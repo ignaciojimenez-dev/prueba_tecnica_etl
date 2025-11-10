@@ -26,18 +26,15 @@ def write_sink(df: DataFrame, sink_config: dict):
         # 2. Construir el writer
         writer = df.write.format(sink_format).mode(sink_mode)
 
-        # 3. Añadir opciones de Schema Evolution (importante)
+        # 3. Añadir opciones de Schema Evolution 
         if sink_format.upper() == 'DELTA':
             if sink_mode == 'overwrite':
                 writer = writer.option("overwriteSchema", "true")
             if sink_mode == 'append':
                 writer = writer.option("mergeSchema", "true")
 
-        # 4. Ejecutar el guardado con saveAsTable
-        #    Esta API (de una sola línea) escribe los datos en 'path' 
-        #    Y registra la tabla en Unity Catalog.
-        writer.option("path", corrected_path).saveAsTable(table_name)
-
+        #writer.option("path", corrected_path).saveAsTable(table_name)
+        writer.saveAsTable(table_name)
         log.info(f"Escritura de tabla '{table_name}' completada.")
 
     except Exception as e:
