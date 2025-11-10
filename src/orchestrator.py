@@ -41,8 +41,8 @@ def run_single_dataflow(spark: SparkSession, dataflow_config: dict):
 
         # --- 1.B. Construir el config de Bronce (Lógica del Orquestador) ---
             bronze_table_name = f"bronze_{source_name}"
-            bronze_path = f"data/bronze/{source_name}" # Ruta base de Bronce
-            
+            #bronze_path = f"data/bronze/{source_name}" # Ruta base de Bronce local
+            bronze_path = f"/Volumes/workspace/prueba_tecnica/bronze/{source_name}"
             bronze_sink_config = {
                 "name": bronze_table_name,
                 "path": bronze_path,

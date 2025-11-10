@@ -13,3 +13,4 @@ data/output/
 # Ficheros de entorno (si los tuvieras)
 .env
 .src/__pycache__
+.metadatos_databrick
