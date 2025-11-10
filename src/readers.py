@@ -20,7 +20,7 @@ def read_source(spark: SparkSession, source_config: dict) -> DataFrame:
         source_format = source_config['format']
         original_path = source_config['path']
 
-        source_path = utils.correct_path_for_local(original_path)
+        source_path = utils.get_absolute_path(original_path)
 
         # --- INICIO DE LA SOLUCIÓN ---
         
@@ -41,7 +41,7 @@ def read_source(spark: SparkSession, source_config: dict) -> DataFrame:
 
 
 
-        
+
         log.info(f"Leyendo fuente '{source_config['name']}' ({source_format}) desde: {source_path}")
 
         # Construimos el reader de Spark

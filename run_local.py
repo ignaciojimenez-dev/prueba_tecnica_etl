@@ -14,7 +14,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-CONFIG_PATH = "PruebaTecnica/config/metadata.json"
+CONFIG_PATH = "config/metadata.json"
 
 def main():
     """

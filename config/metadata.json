@@ -5,12 +5,12 @@
       "sources": [
         {
           "name": "person_inputs",
-          "path": "/data/input/events/person/*",
+          "path": "data/input/events/person/*",
           "format": "JSON"
         },
         {
           "name": "employees_inputs",
-          "path": "/data/input/events/employees/*",
+          "path": "data/input/events/employees/*",
           "format": "JSON"
         }
       ],

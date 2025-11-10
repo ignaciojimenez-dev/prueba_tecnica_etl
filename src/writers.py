@@ -24,7 +24,7 @@ def write_sink(df: DataFrame, sink_config: dict):
         original_path = sink_config.get('path') or sink_config.get('paths')[0]
         
         # Corregir el path para que funcione en local
-        corrected_path = utils.correct_path_for_local(original_path)
+        corrected_path = utils.get_absolute_path(original_path)
 
         log.info(f"Escribiendo sink (Formato: {sink_format}, Modo: {sink_mode}) como TABLA: '{table_name}' en RUTA: {corrected_path}")
 
