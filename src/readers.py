@@ -49,6 +49,9 @@ def read_source(spark: SparkSession, source_config: dict) -> DataFrame:
 
         reader = reader.option("ignoreMissingFiles", "true")
 
+        if source_format.upper() == 'JSON':
+            reader = reader.option("mergeSchema", "true")
+
         df = reader.load(source_path)
         
         log.info(f"Lectura de '{source_config['name']}' completada.")
