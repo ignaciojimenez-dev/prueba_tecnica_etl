@@ -36,25 +36,28 @@ PROJECT_ROOT = get_project_root()
 
 # --- 2. FUNCIÓN DE RUTA CORREGIDA (¡AQUÍ ESTÁ EL ARREGLO!) ---
 
-def get_absolute_path(relative_path: str) -> str:
+def get_absolute_path(path: str) -> str:
     """
-    Convierte un path (relativo o "falsamente absoluto")
-    en un path absoluto para el entorno (local o Databricks).
+    Convierte un path en un path absoluto.
+    - Si es un path absoluto de Databricks (/Volumes/...), lo deja.
+    - Si es un path relativo (config/metadata.json), lo une a la raíz del proyecto.
     """
-    # 1. Si es un URI (s3a://, dbfs://, etc.), lo dejamos
-    if ":" in relative_path:
-        return relative_path
-    
-    
-    # lstrip('/') elimina la barra inicial de "/data/input"
-    # Y no hace nada si es "data/input"
-    cleaned_path = relative_path.lstrip('/')
-    
-    # Unimos la raíz del proyecto (calculada en PROJECT_ROOT) 
-    # con el path limpio.
+
+    # . Si ya es un path absoluto REAL (para /Volumes/... o /dbfs/...)
+    if os.path.isabs(path):
+        # En Databricks, /Volumes/... o /dbfs/... es correcto.
+        if "DATABRICKS_RUNTIME_VERSION" in os.environ:
+             log.debug(f"Path ya es absoluto de Databricks: {path}")
+             return path
+        # En Local, /data/input es un error, lo tratamos como relativo
+        else:
+             pass # Pasa al paso 3 para ser tratado como relativo
+
+    #  Si es relativo (ej: "data/input") O es "falsamente absoluto"
+    #    en local (ej: "/data/input")
+    cleaned_path = path.lstrip('/')
     absolute_path = os.path.join(PROJECT_ROOT, cleaned_path)
-    
-    log.debug(f"Ruta absoluta calculada: {absolute_path}")
+    log.debug(f"Ruta absoluta (relativa al proyecto) calculada: {absolute_path}")
     return absolute_path
 
 # --- 3. FUNCIONES ANTIGUAS (QUE USAN LA FUNCIÓN CORREGIDA) ---
