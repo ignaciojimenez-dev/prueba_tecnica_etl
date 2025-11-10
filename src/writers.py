@@ -1,15 +1,15 @@
 # src/writers.py
 
 import logging
-import os  # <-- Asegúrate de que 'os' está importado
+import os
 from pyspark.sql import DataFrame
-from . import utils
+from . import utils # Importamos el módulo utils completo
 
 log = logging.getLogger(__name__)
 
 def write_sink(df: DataFrame, sink_config: dict):
     """
-    Escribe un DataFrame como una TABLA EXTERNA robusta:
+    Escribe un DataFrame como una TABLA EXTERNA robusta (Unity Catalog compatible):
     1. Guarda los ficheros de datos con .save()
     2. Registra la tabla en el catálogo con CREATE TABLE IF NOT EXISTS
     """
@@ -20,11 +20,8 @@ def write_sink(df: DataFrame, sink_config: dict):
         table_name = sink_config['name'] 
         original_path = sink_config.get('path') or sink_config.get('paths')[0]
         
-        # Esta función (get_absolute_path) ya no es necesaria en Databricks
-        # si tu metadata.json ya tiene las rutas /Volumes/
-        # Pero la dejamos por si la usas en local.
-        # Si estamos en Databricks, get_absolute_path devuelve el path tal cual.
-        corrected_path = utils.get_absolute_path(original_path)
+        # Esta función devuelve la ruta /Volumes/... tal cual
+        corrected_path = utils.get_absolute_path(original_path) 
 
         log.info(f"Escribiendo sink (Formato: {sink_format}, Modo: {sink_mode}) como TABLA: '{table_name}' en RUTA: {corrected_path}")
 
@@ -46,14 +43,9 @@ def write_sink(df: DataFrame, sink_config: dict):
         spark = df.sparkSession
 
         # --- ¡AQUÍ ESTÁ EL ARREGLO! ---
-        # El comando SQL 'LOCATION' necesita un URI completo (dbfs:/)
-        location_path = corrected_path
-        
-        # Si estamos en Databricks y el path no empieza ya con dbfs:
-        if "DATABRICKS_RUNTIME_VERSION" in os.environ and not corrected_path.startswith("dbfs:"):
-            # Añadimos 'dbfs:' al path de /Volumes/
-            location_path = f"dbfs:{corrected_path}"
-            log.debug(f"Usando path DBFS para LOCATION: {location_path}")
+        # Unity Catalog quiere la ruta /Volumes/... tal cual, sin 'dbfs:'.
+        # Así que simplemente usamos la ruta corregida directamente.
+        location_path = corrected_path 
         
         spark.sql(f"""
             CREATE TABLE IF NOT EXISTS {table_name}
