@@ -46,8 +46,8 @@ def run_single_dataflow(spark: SparkSession, dataflow_config: dict):
             bronze_sink_config = {
                 "name": bronze_table_name,
                 "path": bronze_path,
-                "format": "DELTA",      # Bronce siempre es Delta
-                "saveMode": "append"    # Bronce siempre es append
+                "format": "DELTA",
+                "saveMode": "overwrite" 
             }
         # --- 1.C. Llamar al writer para guardar en Bronce ---
             log.info(f"[{dataflow_name}] Guardando {source_name} en tabla Bronce: {bronze_table_name}")
