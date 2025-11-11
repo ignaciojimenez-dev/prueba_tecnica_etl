@@ -38,13 +38,13 @@
       "bronze_sinks": [
         {
           "input": "person_inputs",
-          "name": "workspace.etl_modular.bronze_person",
+          "name": "workspace.elt_modular.bronze_person",
           "format": "DELTA",
           "saveMode": "overwrite"
         },
         {
           "input": "employees_inputs",
-          "name": "workspace.etl_modular.bronze_employees",
+          "name": "workspace.elt_modular.bronze_employees",
           "format": "DELTA",
           "saveMode": "overwrite"
         }
@@ -52,13 +52,13 @@
       "silver_sinks": [
         {
           "input": "person_ok_with_date",
-          "name": "workspace.etl_modular.silver_person_ok",
+          "name": "workspace.elt_modular.silver_person_ok",
           "format": "DELTA",
           "saveMode": "overwrite"
         },
         {
           "input": "validation_person_ko",
-          "name": "workspace.etl_modular.discards_person_ko",
+          "name": "workspace.elt_modular.discards_person_ko",
           "format": "DELTA",
           "saveMode": "overwrite"
         }
@@ -108,7 +108,7 @@
       "bronze_sinks": [
         {
           "input": "polizas_inputs",
-          "name": "workspace.etl_modular.bronze_polizas",
+          "name": "workspace.elt_modular.bronze_polizas",
           "format": "DELTA",
           "saveMode": "overwrite"
         }
@@ -116,13 +116,13 @@
       "silver_sinks": [
         {
           "input": "polizas_ok_with_date",
-          "name": "workspace.etl_modular.silver_polizas_ok",
+          "name": "workspace.elt_modular.silver_polizas_ok",
           "format": "DELTA",
           "saveMode": "overwrite"
         },
         {
           "input": "validation_polizas_ko",
-          "name": "workspace.etl_modular.discards_polizas_ko",
+          "name": "workspace.elt_modular.discards_polizas_ko",
           "format": "DELTA",
           "saveMode": "overwrite"
         }
