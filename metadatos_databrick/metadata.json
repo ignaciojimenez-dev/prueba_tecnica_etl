@@ -5,12 +5,12 @@
       "sources": [
         {
           "name": "person_inputs",
-          "path": "/Volumes/workspace/elt_modular/data/events/person/*",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/person/*",
           "format": "JSON" 
         },
         {
           "name": "employees_inputs",
-          "path": "/Volumes/workspace/elt_modular/data/events/employees/*",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/employees/*",
           "format": "JSON"
         }
       ],
@@ -69,7 +69,7 @@
       "sources": [
         {
           "name": "polizas_inputs",
-          "path": "/Volumes/workspace/elt_modular/data/events/polizas/*",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/polizas/*",
           "format": "JSON"
         }
       ],
