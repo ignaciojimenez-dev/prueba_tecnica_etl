@@ -5,8 +5,7 @@ import sys
 import os
 
 # --- Añadir raíz del proyecto al path ---
-# Esto es crucial para que 'from src import utils' funcione en un Job
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.getcwd() 
 if project_root not in sys.path:
     sys.path.append(project_root)
 # ----------------------------------------
