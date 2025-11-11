@@ -32,7 +32,7 @@ def main():
         return
 
     # --- Widgets ---
-    dbutils.widgets.text("config_path", "/Volumes/workspace/prueba_tecnica/config/metadata.json", "Ruta al metadata.json")
+    dbutils.widgets.text("config_path", "/Volumes/workspace/elt_modular/config/metadata.json", "Ruta al metadata.json")
     config_path = dbutils.widgets.get("config_path")
 
     log.info(f"Tarea 1: Iniciando. Leyendo metadatos desde {config_path}")
