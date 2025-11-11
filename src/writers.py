@@ -2,26 +2,25 @@
 
 import logging
 from pyspark.sql import DataFrame
-from . import utils # Importamos el módulo utils completo
+# ¡Ya no necesitamos importar utils!
 
 log = logging.getLogger(__name__)
 
 def write_sink(df: DataFrame, sink_config: dict):
     """
-    Escribe un DataFrame como una TABLA EXTERNA usando saveAsTable.
-    Este es el método idiomático de Spark y compatible con Unity Catalog.
+    Escribe un DataFrame como una TABLA GESTIONADA usando saveAsTable.
+    Esto es compatible con Serverless y Unity Catalog sin
+    necesidad de configurar 'path'.
     """
     try:
         # 1. Extraer la configuración
         sink_format = sink_config['format']
         sink_mode = sink_config.get('saveMode', 'overwrite')
         table_name = sink_config['name'] 
-        original_path = sink_config.get('path') or sink_config.get('paths')[0]
         
-        # Obtenemos la ruta /Volumes/...
-        corrected_path = utils.get_absolute_path(original_path) 
-
-        log.info(f"Escribiendo sink (Formato: {sink_format}, Modo: {sink_mode}) como TABLA: '{table_name}' en RUTA: {corrected_path}")
+        # ¡HEMOS QUITADO TODA LA LÓGICA DE 'path' y 'get_absolute_path'!
+        
+        log.info(f"Escribiendo sink (Formato: {sink_format}, Modo: {sink_mode}) como TABLA GESTIONADA: '{table_name}'")
 
         # 2. Construir el writer
         writer = df.write.format(sink_format).mode(sink_mode)
@@ -33,8 +32,11 @@ def write_sink(df: DataFrame, sink_config: dict):
             if sink_mode == 'append':
                 writer = writer.option("mergeSchema", "true")
 
-        #writer.option("path", corrected_path).saveAsTable(table_name)
+        # 4. Guardar como TABLA GESTIONADA
+        # Simplemente llamamos a saveAsTable con el nombre.
+        # Ya no se usa .option("path", ...)
         writer.saveAsTable(table_name)
+        
         log.info(f"Escritura de tabla '{table_name}' completada.")
 
     except Exception as e:

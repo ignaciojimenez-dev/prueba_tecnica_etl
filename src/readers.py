@@ -22,34 +22,16 @@ def read_source(spark: SparkSession, source_config: dict) -> DataFrame:
 
         source_path = utils.get_absolute_path(original_path)
 
-        # --- INICIO DE LA SOLUCIÓN ---
-        
-        # Separamos el path base del "glob" (*)
-        # ej: "/ruta/polizas/*" -> "/ruta/polizas"
-        base_dir = os.path.dirname(source_path)
-
-        # 1. Comprobamos si el directorio base existe
-        if not os.path.isdir(base_dir):
-            # Si la carpeta NO existe, no podemos leer.
-            log.warning(f"Directorio base no encontrado para el source '{source_config['name']}'. Saltando. Ruta: {base_dir}")
-            # Devolvemos un DataFrame vacío
-            return spark.createDataFrame([], df.schema if 'df' in locals() else None) # type: ignore
-
-        # 2. Si la carpeta SÍ existe, intentamos leer
-        #    (ignoreMissingFiles=true se encargará si está vacía)
-        # --- FIN DE LA SOLUCIÓN ---
-
-
-
-
         log.info(f"Leyendo fuente '{source_config['name']}' ({source_format}) desde: {source_path}")
 
         # Construimos el reader de Spark
         reader = spark.read.format(source_format)
 
+        # Esta es la opción correcta para manejar carpetas vacías o faltantes
         reader = reader.option("ignoreMissingFiles", "true")
 
         if source_format.upper() == 'JSON':
+            # mergeSchema es bueno para ingesta de JSON
             reader = reader.option("mergeSchema", "true")
 
         df = reader.load(source_path)

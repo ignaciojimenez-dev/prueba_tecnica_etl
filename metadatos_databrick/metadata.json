@@ -1,123 +1,130 @@
 {
   "dataflows": [
     {
-      "name": "df1",
+      "name": "df1_persons_employees",
       "sources": [
         {
           "name": "person_inputs",
-          "path": "/Volumes/workspace/prueba_tecnica/data/events/person/*",
-          "format": "JSON"
+          "path": "/Volumes/workspace/elt_modular/data/events/person/*",
+          "format": "JSON" 
         },
         {
           "name": "employees_inputs",
-          "path": "/Volumes/workspace/prueba_tecnica/data/events/employees/*",
+          "path": "/Volumes/workspace/elt_modular/data/events/employees/*",
           "format": "JSON"
         }
       ],
       "transformations": [
         {
-          "name": "validation",
+          "name": "validation_person",
           "type": "validate_fields",
-          "params": {
-            "input": "person_inputs",
+          "params": { 
+            "input": "person_inputs", 
             "validations": [
-              {
-                "field": "office",
-                "validations": ["notEmpty"]
-              },
-              {
-                "field": "age",
-                "validations": ["notNull"]
-              }
-            ]
+              {"field": "office", "validations": ["notEmpty"]},
+              {"field": "age", "validations": ["notNull"]}
+            ] 
           }
         },
         {
-          "name": "ok_with_date",
+          "name": "person_ok_with_date",
           "type": "add_fields",
-          "params": {
-            "input": "validation_ok",
-            "addFields": [
-              {
-                "name": "dt",
-                "function": "current_timestamp"
-              }
-            ]
+          "params": { 
+            "input": "validation_person_ok", 
+            "addFields": [{"name": "dt", "function": "current_timestamp"}]
           }
         }
       ],
-      "sinks": [
+      "bronze_sinks": [
         {
-          "input": "ok_with_date",
-          "name": "raw_ok",
-          "paths": ["/Volumes/workspace/prueba_tecnica/silver/person"],
+          "input": "person_inputs",
+          "name": "workspace.etl_modular.bronze_person",
           "format": "DELTA",
-          "saveMode": "OVERWRITE"
+          "saveMode": "overwrite"
         },
         {
-          "input": "validation_ko",
-          "name": "raw_ko",
-          "paths": ["/Volumes/workspace/prueba_tecnica/discards/person"],
+          "input": "employees_inputs",
+          "name": "workspace.etl_modular.bronze_employees",
           "format": "DELTA",
-          "saveMode": "OVERWRITE"
+          "saveMode": "overwrite"
+        }
+      ],
+      "silver_sinks": [
+        {
+          "input": "person_ok_with_date",
+          "name": "workspace.etl_modular.silver_person_ok",
+          "format": "DELTA",
+          "saveMode": "overwrite"
+        },
+        {
+          "input": "validation_person_ko",
+          "name": "workspace.etl_modular.discards_person_ko",
+          "format": "DELTA",
+          "saveMode": "overwrite"
         }
       ]
     },
     {
-      "name": "df2",
+      "name": "df2_polizas",
       "sources": [
         {
-          "name": "person_inputs",
-          "path": "/Volumes/workspace/prueba_tecnica/data/inputs/events/polizas/",
+          "name": "polizas_inputs",
+          "path": "/Volumes/workspace/elt_modular/data/events/polizas/*",
           "format": "JSON"
         }
       ],
       "transformations": [
         {
-          "name": "validation",
+          "name": "validation_polizas",
           "type": "validate_fields",
           "params": {
-            "input": "person_inputs",
+            "input": "polizas_inputs",
             "validations": [
               {
-                "field": "office",
+                "field": "policy_id",
                 "validations": ["notEmpty"]
               },
               {
-                "field": "age",
+                "field": "premium",
                 "validations": ["notNull"]
               }
             ]
           }
         },
         {
-          "name": "ok_with_date",
+          "name": "polizas_ok_with_date",
           "type": "add_fields",
           "params": {
-            "input": "validation_ok",
+            "input": "validation_polizas_ok",
             "addFields": [
               {
-                "name": "dt",
+                "name": "dt_ingestion",
                 "function": "current_timestamp"
               }
             ]
           }
         }
       ],
-      "sinks": [
+      "bronze_sinks": [
         {
-          "input": "ok_with_date",
-          "name": "raw_ok",
-          "paths": ["/Volumes/workspace/prueba_tecnica/silver/person"],
+          "input": "polizas_inputs",
+          "name": "workspace.etl_modular.bronze_polizas",
           "format": "DELTA",
-          "saveMode": "OVERWRITE"
+          "saveMode": "overwrite"
+        }
+      ],
+      "silver_sinks": [
+        {
+          "input": "polizas_ok_with_date",
+          "name": "workspace.etl_modular.silver_polizas_ok",
+          "format": "DELTA",
+          "saveMode": "overwrite"
         },
         {
-          "input": "validation_ko",
-          "name": "raw_ko",
-          "paths": ["/Volumes/workspace/prueba_tecnica/discards/person"],
+          "input": "validation_polizas_ko",
+          "name": "workspace.etl_modular.discards_polizas_ko",
           "format": "DELTA",
-          "saveMode": "OVERWRITE"
+          "saveMode": "overwrite"
         }
       ]
     }
