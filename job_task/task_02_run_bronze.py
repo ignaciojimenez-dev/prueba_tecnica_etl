@@ -17,8 +17,7 @@ spark = SparkSession.builder.getOrCreate()
 dbutils = DBUtils(spark)
 
 def main():
-    dbutils.widgets.text("dataflow_config_json", "{}", "Configuración del Dataflow (JSON String)")
-    dataflow_json_string = dbutils.widgets.get("dataflow_config_json")
+    dataflow_json_string = sys.argv[1]
     log.info("Tarea 2 (Run Bronze) iniciada.")
 
     try:
