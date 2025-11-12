@@ -35,14 +35,12 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
     
     try:
         # --- 1. FASE DE TRANSFORMACIÓN ---
-        # (Modificada para leer de Bronce si es necesario)
         
         log.info(f"[{dataflow_name}] Fase 2: Aplicando Transformaciones...")
         for tx_config in dataflow_config.get('transformations', []):
             params = tx_config['params']
-            input_df_name = params['input'] # ej: "person_inputs"
+            input_df_name = params['input'] # tabla y dataframe "person_inputs"
             
-            # --- Lógica Clave ---
             # Si el DF de entrada (ej: 'person_inputs') NO está en memoria...
             if input_df_name not in dataframes_state:
                 # ...significa que debemos leerlo de la tabla Bronce.
@@ -68,10 +66,10 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
 
         # --- 2. FASE DE ESCRITURA (Load Silver) ---
         log.info(f"[{dataflow_name}] Fase 3: Escribiendo Silver Sinks...")
-        # Ahora lee 'silver_sinks' en lugar de 'sinks'
+        # Ahora lee 'silver_sinks'
         for sink_config in dataflow_config.get('silver_sinks', []):
-            input_df_name = sink_config['input'] # ej: "validation_ok"
-            table_name = sink_config['name']     # ej: "workspace.etl_modular.silver_person_ok"
+            input_df_name = sink_config['input'] 
+            table_name = sink_config['name']    
             
             log.info(f"[{dataflow_name}] Escribiendo: {input_df_name} -> {table_name}")
 
@@ -85,5 +83,5 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
         log.info(f"[{dataflow_name}] --- OK Capa Silver completada ---")
 
     except Exception as e:
-        log.error(f"--- X ERROR FATAL en Capa Silver {dataflow_name} ---: {e}", exc_info=True)
+        log.error(f"--- ERROR FATAL en Capa Silver {dataflow_name} ---: {e}", exc_info=True)
         raise

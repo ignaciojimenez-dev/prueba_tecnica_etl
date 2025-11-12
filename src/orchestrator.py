@@ -8,8 +8,7 @@ log = logging.getLogger(__name__)
 
 def run_single_dataflow(spark: SparkSession, dataflow_config: dict):
     """
-    Ejecuta un dataflow COMPLETO en modo local (para run_local.py).
-    Simula el flujo pero mantiene los DFs en memoria para Silver.
+    Ejecuta un dataflow COMPLETO.
     """
     dataflow_name = dataflow_config.get('name', 'unnamed_dataflow')
     log.info(f" Iniciando Dataflow (Modo Local Integrado): {dataflow_name} ")

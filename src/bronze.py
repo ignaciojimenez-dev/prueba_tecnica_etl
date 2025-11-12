@@ -18,7 +18,7 @@ def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict):
     dataframes_state = {}
 
     try:
-        # --- 1. FASE DE LECTURA (Extract) ---
+        #  1. FASE DE LECTURA (Extract) 
         log.info(f"[{dataflow_name}] Leyendo Sources...")
         for source_config in dataflow_config.get('sources', []):
             source_name = source_config['name']
@@ -26,11 +26,11 @@ def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict):
             df = readers.read_source(spark, source_config)
             dataframes_state[source_name] = df # Guardamos el DF en memoria
 
-        # --- 2. FASE DE ESCRITURA (Load Bronze) ---
+        #  2. FASE DE ESCRITURA (Load Bronze) 
         log.info(f"[{dataflow_name}] Escribiendo Bronze Sinks...")
         for sink_config in dataflow_config.get('bronze_sinks', []):
-            input_df_name = sink_config['input'] # ej: "person_inputs"
-            table_name = sink_config['name']     # ej: "workspace.etl_modular.bronze_person"
+            input_df_name = sink_config['input'] 
+            table_name = sink_config['name']     
             
             log.info(f"[{dataflow_name}] Escribiendo: {input_df_name} -> {table_name}")
 
