@@ -22,8 +22,8 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
     """
     Ejecuta la parte de Silver y Sinks.
     
-    Si 'initial_state' es None (Modo Job), lee desde las tablas Bronce.
-    Si 'initial_state' se proporciona (Modo Local), lo usa.
+    Si 'initial_state' es None , lee desde las tablas Bronce.
+    Si 'initial_state' se proporciona lo usa.
     """
     dataflow_name = dataflow_config.get('name', 'unnamed_dataflow')
     log.info(f"[{dataflow_name}] --- Iniciando Capa Silver ---")
@@ -43,7 +43,7 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
             
             # Si el DF de entrada (ej: 'person_inputs') NO está en memoria...
             if input_df_name not in dataframes_state:
-                # ...significa que debemos leerlo de la tabla Bronce.
+                #  leer de la tabla Bronce.
                 
                 # 1. Buscamos qué tabla Bronce le corresponde
                 bronze_table = _get_bronze_table_for_input(dataflow_config, input_df_name)
