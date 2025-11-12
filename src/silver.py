@@ -14,7 +14,7 @@ def _get_bronze_table_for_input(dataflow_config: dict, input_name: str) -> str:
         if sink['input'] == input_name:
             return sink['name'] # ej: "workspace.etl_modular.bronze_person"
     
-    # Si no lo encuentra, puede ser un DF intermedio (como 'validation_ok')
+    
     return None 
 
 def run_silver_processing(spark: SparkSession, dataflow_config: dict, 
@@ -37,6 +37,10 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
         # --- 1. FASE DE TRANSFORMACIÓN ---
         
         log.info(f"[{dataflow_name}] Fase 2: Aplicando Transformaciones...")
+
+        #itera por las transforamciones, recibe de inputs las tablas donde validar
+        # dos transforamciones en este caso para una tabla , pero podria ser mas
+        #primero las validaciones para una tabla,
         for tx_config in dataflow_config.get('transformations', []):
             params = tx_config['params']
             input_df_name = params['input'] # tabla y dataframe "person_inputs"
@@ -64,9 +68,9 @@ def run_silver_processing(spark: SparkSession, dataflow_config: dict,
             transformers.apply_transform(spark, dataframes_state, tx_config)
 
 
-        # --- 2. FASE DE ESCRITURA (Load Silver) ---
+        # --- 2. FASE DE ESCRITURA  Silver ---
         log.info(f"[{dataflow_name}] Fase 3: Escribiendo Silver Sinks...")
-        # Ahora lee 'silver_sinks'
+        # lee 'silver_sinks'
         for sink_config in dataflow_config.get('silver_sinks', []):
             input_df_name = sink_config['input'] 
             table_name = sink_config['name']    

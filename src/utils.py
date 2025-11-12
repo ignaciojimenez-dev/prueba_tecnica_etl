@@ -9,6 +9,9 @@ from typing import Union, Optional
 log = logging.getLogger(__name__)
 
 
+# funciones que permiten usar rutas relativas para los archivos de configuración y sources,
+#  y se asegura de que funcionen en ambos entornos, dando la absoluta para cada entorno
+ 
 def get_project_root() -> str:
     """
     Obtiene la ruta raíz absoluta del proyecto, tanto en local 
@@ -31,10 +34,9 @@ def get_project_root() -> str:
         log.debug(f"Raíz del proyecto (Local): {project_root}")
         return project_root
 
-# Obtenemos la raíz  al importar el módulo
+# Obtenemos la raíz  al importar el modulo
 PROJECT_ROOT = get_project_root()
 
-# --- 2. FUNCIÓN DE RUTA CORREGIDA (¡AQUÍ ESTÁ EL ARREGLO!) ---
 
 def get_absolute_path(path: str) -> str:
     """
@@ -60,11 +62,10 @@ def get_absolute_path(path: str) -> str:
     log.debug(f"Ruta absoluta (relativa al proyecto) calculada: {absolute_path}")
     return absolute_path
 
-# --- 3. FUNCIONES ANTIGUAS (QUE USAN LA FUNCIÓN CORREGIDA) ---
 
 def get_spark_session() -> SparkSession:
     """
-    Crea u obtiene una SparkSession.
+    Crea una SparkSession, en local la crea , en databricks usa la prpoia de databrcks
     """
     if "DATABRICKS_RUNTIME_VERSION" in os.environ:
         log.info("Entorno Databricks detectado. Obteniendo sesión 'spark' existente.")

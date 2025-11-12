@@ -2,13 +2,12 @@
 
 import logging
 from pyspark.sql import DataFrame
-# ¡Ya no necesitamos importar utils!
 
 log = logging.getLogger(__name__)
 
 def write_sink(df: DataFrame, sink_config: dict):
     """
-    Escribe un DataFrame como una TABLA GESTIONADA usando saveAsTable.
+    Escribe un DataFrame como una managed table usando saveAsTable.
     Esto es compatible con Serverless y Unity Catalog sin
     necesidad de configurar 'path'.
     """
@@ -18,7 +17,6 @@ def write_sink(df: DataFrame, sink_config: dict):
         sink_mode = sink_config.get('saveMode', 'overwrite')
         table_name = sink_config['name'] 
         
-        # ¡HEMOS QUITADO TODA LA LÓGICA DE 'path' y 'get_absolute_path'!
         
         log.info(f"Escribiendo sink (Formato: {sink_format}, Modo: {sink_mode}) como TABLA GESTIONADA: '{table_name}'")
 
@@ -34,7 +32,6 @@ def write_sink(df: DataFrame, sink_config: dict):
 
         # 4. Guardar como TABLA GESTIONADA
         # Simplemente llamamos a saveAsTable con el nombre.
-        # Ya no se usa .option("path", ...)
         writer.saveAsTable(table_name)
         
         log.info(f"Escritura de tabla '{table_name}' completada.")

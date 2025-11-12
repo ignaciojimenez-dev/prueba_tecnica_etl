@@ -26,7 +26,7 @@ def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict) -> dict: # 
             df = readers.read_source(spark, source_config)
             dataframes_state[source_name] = df # Guardamos el DF en memoria
 
-        # --- 2. FASE DE ESCRITURA (Load Bronze) ---
+        # --- 2. FASE DE ESCRITURA 
         log.info(f"[{dataflow_name}] Escribiendo Bronze Sinks...")
         for sink_config in dataflow_config.get('bronze_sinks', []):
             input_df_name = sink_config['input']
@@ -43,7 +43,7 @@ def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict) -> dict: # 
         
         log.info(f"[{dataflow_name}] --- OK Capa Bronze completada ---")
         
-        # Devolvemos el estado para que el orquestador pueda usarlo
+        # se deveulve el estado para que el orquestador pueda usarlo
         return dataframes_state
 
     except Exception as e:

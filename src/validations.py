@@ -8,8 +8,8 @@ from typing import Tuple
 log = logging.getLogger(__name__)
 
 # --- 1. Funciones de Validación Modulares ---
-# Recibe el nombre de la columna y devuelve una EXPRESIÓN de Spark.
-# La expresión devuelve un código de error (ej: "notNull") si falla,
+# Recibe el nombre de la columna 
+# La expresión devuelve un código de error si falla,
 # o 'None' (nulo) si la validación pasa.
 
 def _validate_not_null(col_name: str) -> F.Column:
@@ -32,7 +32,7 @@ def _validate_not_empty(col_name: str) -> F.Column:
     ).otherwise(None)     
 
 
-# --- Aquí puedes añadir fácilmente más reglas ---
+# --- añadir nuevas reglas modulares ---
 def _validate_is_email(col_name: str) -> F.Column:
      """
      Devuelve una expresión que comprueba un patrón de email.
@@ -46,6 +46,7 @@ def _validate_is_email(col_name: str) -> F.Column:
 
 # Esta funcion mapea el nombre de la regla a la
 # función de validación modular correspondiente.
+# FUNCION  que escoge de forma dinamica tantas _validate como haya en el metadato
 
 def _get_validation_expression(validation_name: str, col_name: str) -> F.Column:
     """
@@ -57,10 +58,9 @@ def _get_validation_expression(validation_name: str, col_name: str) -> F.Column:
     elif validation_name == 'notEmpty':
         return _validate_not_empty(col_name)
     
-    #  Añade aquí las nuevas reglas 
+    #  Añadir nuevas reglas 
     #  validation_name == 'isEmail':
     #
-
 
     else:
         # Si no encuentra  la regla
@@ -68,8 +68,7 @@ def _get_validation_expression(validation_name: str, col_name: str) -> F.Column:
         return F.lit(None).cast("string")
 
 
-#  La Función  Principal
-# desde (transformers.py) solo se llama a esta funcion.
+# desde transformers.py solo se llama a esta funcion.
 
 def validate_fields(df: DataFrame, validation_rules: list) -> Tuple[DataFrame, DataFrame]:
     """
@@ -100,10 +99,8 @@ def validate_fields(df: DataFrame, validation_rules: list) -> Tuple[DataFrame, D
             
             error_expr = _get_validation_expression(val_name, field_name)
             
-            # F.coalesce() toma el primer valor no nulo.
-            # Si 'current_error_col' ya tiene un error (ej: "notNull"),
-            # se queda con ese. Si es nulo, comprueba 'error_expr'.
-            # Esto captura el PRIMER error encontrado para el campo.
+            # Si 'current_error_col' ya tiene un error ejemplo  "notNull",
+            # se queda con ese,si es nulo, comprueba 'error_expr'.
             current_error_col = F.coalesce(current_error_col, error_expr)
         
         # 3 Añadir la columna de error final del campo al DataFrame
@@ -128,7 +125,7 @@ def validate_fields(df: DataFrame, validation_rules: list) -> Tuple[DataFrame, D
     # Limpiamos el mapa: quitamos las 'keys' cuyo 'value' es null
     df = df.withColumn(
         "arraycoderrorbyfield",
-        # CAMBIO: Usamos 'map_filter' en lugar de 'filter' para Mapas
+        # Usamos 'map_filter' en lugar de 'filter' para Mapas
         F.expr("map_filter(arraycoderrorbyfield, (k, v) -> v is not null)")
     )
 

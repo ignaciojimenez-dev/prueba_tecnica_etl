@@ -9,7 +9,7 @@ from . import validations
 log = logging.getLogger(__name__)
 
 # ---  Funciones de Transformación Modulares ---
-# Cada función maneja un tipo específico de transformación.
+# cada funcion maneja un tipo especifico de transformacion.
 
 def _apply_validate_fields(df: DataFrame, params: dict) -> dict:
     """
@@ -18,10 +18,10 @@ def _apply_validate_fields(df: DataFrame, params: dict) -> dict:
     """
     validation_rules = params['validations']
     
-    # Llamamos a la función modular que creamos en validations.py
+    #  funcion modular  en validations.py
     df_ok, df_ko = validations.validate_fields(df, validation_rules)
     
-    # Devolvemos un diccionario para que la función principal sepa qué guardar
+    # Devolvemos un diccionario para una tabla con 2 salidas validadas y no
     return {"ok": df_ok, "ko": df_ko}
 
 
@@ -44,13 +44,9 @@ def _apply_add_fields(df: DataFrame, params: dict) -> DataFrame:
         if col_function == 'current_timestamp':
             temp_df = temp_df.withColumn(col_name, F.current_timestamp())
         
-        # --- Aquí puedes añadir más funciones ---
+        # --- Aquí  añadir más funciones ---
         # elif col_function == 'current_date':
         #     temp_df = temp_df.withColumn(col_name, F.current_date())
-        # elif col_function.startswith('lit('):
-        #     # Para añadir literales, ej: "function": "lit(Hola)"
-        #     value = col_function[4:-1]
-        #     temp_df = temp_df.withColumn(col_name, F.lit(value))
             
         else:
             log.warning(f"Función '{col_function}' no reconocida para '{col_name}'. Columna no añadida.")
@@ -84,8 +80,11 @@ def apply_transform(spark: SparkSession, dataframes_state: dict, transform_confi
     
     log.info(f"Aplicando transformación: '{transform_name}' (Tipo: {transform_type})")
 
-    # --- El Despachador (Dispatcher) ---
-    # Decide qué función llamar basado en el 'type'
+
+    # Decide qué función llamar basado en el 'type', 
+    # habra 2 llamadas , primero validaciones a una tabla
+    # luego transformaciones a esa misma tabla
+    # y tantas val y trans como haya en el metadata
     
     if transform_type == 'validate_fields':
         # Esta transformación es especial: devuelve dos DFs (ok, ko)

@@ -4,22 +4,21 @@ import logging
 import sys
 import os
 
-# --- Añadir raíz del proyecto al path ---
+#  Añadir raíz del proyecto al path - no leia el modulo src
 project_root = os.getcwd() 
 if project_root not in sys.path:
     sys.path.append(project_root)
-# ----------------------------------------
 
 from src import utils
 from pyspark.dbutils import DBUtils # type: ignore
 from pyspark.sql import SparkSession
 
-# Obtener dbutils solo funciona en Databricks
+# Obtener dbutils solo funciona que solo funciona en databricks # type: ignore
 try:
     spark = SparkSession.builder.getOrCreate()
     dbutils = DBUtils(spark)
 except ImportError:
-    print("DBUtils no encontrado. Asumiendo ejecución fuera de Databricks (no funcionará).")
+    print("DBUtils no encontrado. Asumiendo ejecución fuera de databricks.")
     dbutils = None
 
 # Configuración del logging
@@ -31,23 +30,23 @@ def main():
         log.error("DBUtils no está disponible. Este script debe ejecutarse como un Job de Databricks.")
         return
 
-    # --- Widgets ---
-    #dbutils.widgets.text("config_path", "/Volumes/workspace/elt_modular/config/metadata.json", "Ruta al metadata.json")
-    #config_path = dbutils.widgets.get("config_path")
+    # leemos el parametro de inputs , ruta del volumen en UNIT catalog donde esta el metadatos
     config_path = sys.argv[1]
     log.info(f"Tarea 1: Iniciando. Leyendo metadatos desde {config_path}")
 
-    # 1. Cargar la configuración
+    # Cargar la configuración del json de metadatos
     config = utils.load_config(config_path)
+
+    # comprobamos que el fichero no esta vacio y hay dataflow
+
+    ################################ añadir mas validaciones al metadatos ################################
 
     if config and 'dataflows' in config:
         dataflows_list = config['dataflows']
         log.info(f"Metadatos cargados. {len(dataflows_list)} dataflows encontrados.")
         
-        # 2. Pasar la lista de dataflows a la Tarea 2 (ForEach)
-        # Convertimos la lista de diccionarios a un string JSON
-        # NOTA: Databricks Jobs prefiere pasar listas de valores simples.
-        # Es mejor pasar la lista de diccionarios directamente.
+        # 2. Pasar la lista de de dict's de dataflows a la Tarea 2
+        # se convierte  la lista de diccionarios a un string JSON
         dbutils.jobs.taskValues.set(key="dataflows_config_list", value=dataflows_list)
         
         log.info(f"Lista de {len(dataflows_list)} dataflows pasada a la siguiente tarea.")
