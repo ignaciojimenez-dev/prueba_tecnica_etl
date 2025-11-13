@@ -33,7 +33,7 @@ def bronze_person():
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
             .option("cloudFiles.inferColumnTypes", "true")
-            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt") 
+            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_person") 
             .load(PERSON_SOURCE_PATH)
 =======
     comment="Carga incremental con Auto Loader de archivos JSON de personas"
@@ -63,7 +63,7 @@ def bronze_employees():
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
             .option("cloudFiles.inferColumnTypes", "true")
-            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt")
+            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_employees")
             .load(EMPLOYEES_SOURCE_PATH)
 =======
     """
