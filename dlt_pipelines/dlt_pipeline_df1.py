@@ -8,7 +8,7 @@ from pyspark.sql import functions as F
 PERSON_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/person/*"
 EMPLOYEES_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/employees/*"
 
-# Reglas de validación para 'person_inputs'
+# Reglas de validación para 'person_inputs
 person_validation_rules = {
     "office_not_empty": "office IS NOT NULL AND office != ''",
     "age_not_null": "age IS NOT NULL"
@@ -24,7 +24,6 @@ employees_validation_rules = {
 
 @dp.table(
     name="bronze_person",
-<<<<<<< HEAD
     comment="Carga incremental  de archivos JSON de personas"
 )
 def bronze_person():
@@ -35,21 +34,6 @@ def bronze_person():
             .option("cloudFiles.inferColumnTypes", "true")
             .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_person") 
             .load(PERSON_SOURCE_PATH)
-=======
-    comment="Carga incremental con Auto Loader de archivos JSON de personas"
-)
-def bronze_person():
-    """
-    Define la tabla bronze_person.
-    Usa Auto Loader para leer JSON de forma incremental.
-    """
-    return (
-        spark.readStream.format("cloudFiles") # type: ignore
-        .option("cloudFiles.format", "json")
-        .option("cloudFiles.inferColumnTypes", "true")
-        .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_person") 
-        .load(PERSON_SOURCE_PATH)
->>>>>>> origin/master
     )
 
 @dp.table(
@@ -57,7 +41,6 @@ def bronze_person():
     comment="Carga incremental  de archivos JSON de empleados"
 )
 def bronze_employees():
-<<<<<<< HEAD
     """ Reemplaza a readers.py y bronze.py  """
     return (
         spark.readStream.format("cloudFiles") # type: ignore
@@ -65,18 +48,6 @@ def bronze_employees():
             .option("cloudFiles.inferColumnTypes", "true")
             .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_employees")
             .load(EMPLOYEES_SOURCE_PATH)
-=======
-    """
-    Define la tabla bronze_employees.
-    Usa Auto Loader (cloudFiles) para leer JSON de forma incremental.
-    """
-    return (
-        spark.readStream.format("cloudFiles") # type: ignore
-        .option("cloudFiles.format", "json")
-        .option("cloudFiles.inferColumnTypes", "true")
-        .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_employees")
-        .load(EMPLOYEES_SOURCE_PATH)
->>>>>>> origin/master
     )
 
 
