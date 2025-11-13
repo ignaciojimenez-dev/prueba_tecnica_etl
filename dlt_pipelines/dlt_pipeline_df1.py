@@ -16,7 +16,7 @@ person_validation_rules = {
 
 # Reglas de validacion para 'employees_inputs'
 employees_validation_rules = {
-    "employee_id_not_null": "employee_id IS NOT NULL" 
+    "name_not_null": "name IS NOT NULL AND name != ''" 
 }
 
 
