@@ -31,7 +31,6 @@ def bronze_person():
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
             .option("cloudFiles.inferColumnTypes", "true")
-            # Ruta donde Auto Loader guarda los archivos que ya ha leído
             .option("cloudFiles.schemaLocation", "/tmp/dlt/schemas/bronze_person") 
             .load(PERSON_SOURCE_PATH)
     )
