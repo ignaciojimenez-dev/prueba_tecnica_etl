@@ -1,30 +1,30 @@
-# Importamos  "Declarative Pipelines" 
+# Importamos Declarative Pipelines no DLT
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-# --- 1. Lógica de Metadatos (Definida en el código) ---
+# --- 1. Lógica de Metadatos  ---
 
-# Paths de los 'sources' donde DLT leerá los archivos
+# Paths de los sources 
 PERSON_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/person/*"
 EMPLOYEES_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/employees/*"
 
-# Reglas de validación para 'person_inputs
+# Reglas de validacion para person
 person_validation_rules = {
     "office_not_empty": "office IS NOT NULL AND office != ''",
     "age_not_null": "age IS NOT NULL"
 }
 
-# Reglas de validacion para 'employees_inputs'
+# Reglas de validacion para employees
 employees_validation_rules = {
     "employee_id_not_null": "employee_id IS NOT NULL" 
 }
 
 
-# --- 2. Capa de Bronce.Ingesta con Auto Loader ---
+# --- 2. Capa de Bronce con Auto Loader---
 
 @dp.table(
     name="bronze_person",
-    comment="Carga incremental  de archivos JSON de personas"
+    comment="Carga incremental de archivos JSON de personas"
 )
 def bronze_person():
     """ Reemplaza a readers.py y bronze.py del otro proyecto """
@@ -38,10 +38,10 @@ def bronze_person():
 
 @dp.table(
     name="bronze_employees",
-    comment="Carga incremental  de archivos JSON de empleados"
+    comment="Carga incremental de archivos JSON de empleados"
 )
 def bronze_employees():
-    """ Reemplaza a readers.py y bronze.py  """
+    """ Reemplaza a readers.py y bronze.py """
     return (
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
@@ -51,19 +51,19 @@ def bronze_employees():
     )
 
 
-# --- 3. Capa de Plata (Validación y Transformación) ---
+# --- 3. Capa de Plata Validación y Transformación ---
 
 # --- Sección PERSONAS ---
 
 @dp.table(
     name="silver_person_pre_quality",
-    comment="Aplica reglas de calidad a person y desvía con quarantine los KO"
+    comment="Aplica reglas de calidad a person y descarta (drop) los KO"
 )
-@dp.expect_all_or_quarantine(person_validation_rules)
+@dp.expect_all_or_drop(person_validation_rules)
 def silver_person_pre_quality():
     """
     Define una tabla intermedia que aplica las reglas de calidad.
-    Los registros KO se desvían a 'silver_person_pre_quality_quarantined'.
+    Los registros KO se descartan (drop).
     """
     return dp.read_stream("bronze_person")
 
@@ -73,14 +73,8 @@ def silver_person_pre_quality():
 )
 def silver_person_ok():
     """
-<<<<<<< HEAD
-    Lee solo los registros OK  de la tabla anterior.
+    Lee solo los registros OK de la tabla anterior.
     Aplica la lógica de 'add_fields' de transformers.py.
-=======
-    Define la tabla final OK.
-    Lee solo los registros buenos  de la tabla anterior.
-    Aplica la transformación de 'add_fields' (añadir fecha).
->>>>>>> origin/master
     """
     return (
         dp.read("silver_person_pre_quality")
@@ -91,13 +85,13 @@ def silver_person_ok():
 
 @dp.table(
     name="silver_employees_pre_quality",
-    comment="Aplica reglas de calidad a 'employees' y desvía quarantine los KO"
+    comment="Aplica reglas de calidad a 'employees' y descarta (drop) los KO"
 )
-@dp.expect_all_or_quarantine(employees_validation_rules)
+@dp.expect_all_or_drop(employees_validation_rules)
 def silver_employees_pre_quality():
     """
     Define una tabla intermedia que aplica las reglas de calidad.
-    Los registros KO se desvían a 'silver_employees_pre_quality_quarantined'.
+    Los registros KO se descartan (drop).
     """
     return dp.read_stream("bronze_employees")
 
@@ -112,5 +106,5 @@ def silver_employees_ok():
     """
     return (
         dp.read("silver_employees_pre_quality")
-           .withColumn("ingestion_dt", F.current_timestamp()) # Transformación de ejemplo
+           .withColumn("ingestion_dt", F.current_timestamp()) 
     )
