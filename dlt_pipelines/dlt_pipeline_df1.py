@@ -1,9 +1,10 @@
-import dlt # type: ignore
+# Importamos  "Declarative Pipelines" 
+from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-# --- 1. Lógica de Metadatos  ---
+# --- 1. Lógica de Metadatos (Definida en el código) ---
 
-# Paths de los 'sources'
+# Paths de los 'sources' donde DLT leerá los archivos
 PERSON_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/person/*"
 EMPLOYEES_SOURCE_PATH = "/Volumes/workspace/elt_modular/data/inputs/events/employees/*"
 
@@ -13,16 +14,17 @@ person_validation_rules = {
     "age_not_null": "age IS NOT NULL"
 }
 
-# Reglas de validación para 'employees_inputs'
+# Reglas de validacion para 'employees_inputs'
 employees_validation_rules = {
     "employee_id_not_null": "employee_id IS NOT NULL" 
 }
 
 
-# --- 2. Capa de Bronce con Auto Loader ---
+# --- 2. Capa de Bronce.Ingesta con Auto Loader ---
 
-@dlt.table(
+@dp.table(
     name="bronze_person",
+<<<<<<< HEAD
     comment="Carga incremental  de archivos JSON de personas"
 )
 def bronze_person():
@@ -33,13 +35,29 @@ def bronze_person():
             .option("cloudFiles.inferColumnTypes", "true")
             .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt") 
             .load(PERSON_SOURCE_PATH)
+=======
+    comment="Carga incremental con Auto Loader de archivos JSON de personas"
+)
+def bronze_person():
+    """
+    Define la tabla bronze_person.
+    Usa Auto Loader para leer JSON de forma incremental.
+    """
+    return (
+        spark.readStream.format("cloudFiles") # type: ignore
+        .option("cloudFiles.format", "json")
+        .option("cloudFiles.inferColumnTypes", "true")
+        .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_person") 
+        .load(PERSON_SOURCE_PATH)
+>>>>>>> origin/master
     )
 
-@dlt.table(
+@dp.table(
     name="bronze_employees",
     comment="Carga incremental  de archivos JSON de empleados"
 )
 def bronze_employees():
+<<<<<<< HEAD
     """ Reemplaza a readers.py y bronze.py  """
     return (
         spark.readStream.format("cloudFiles") # type: ignore
@@ -47,65 +65,81 @@ def bronze_employees():
             .option("cloudFiles.inferColumnTypes", "true")
             .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt")
             .load(EMPLOYEES_SOURCE_PATH)
+=======
+    """
+    Define la tabla bronze_employees.
+    Usa Auto Loader (cloudFiles) para leer JSON de forma incremental.
+    """
+    return (
+        spark.readStream.format("cloudFiles") # type: ignore
+        .option("cloudFiles.format", "json")
+        .option("cloudFiles.inferColumnTypes", "true")
+        .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt/bronze_employees")
+        .load(EMPLOYEES_SOURCE_PATH)
+>>>>>>> origin/master
     )
 
 
-# --- 3. Capa de Plata Validacion y Transformacion ---
+# --- 3. Capa de Plata (Validación y Transformación) ---
 
-# --- Seccion PERSONAS ---
+# --- Sección PERSONAS ---
 
-@dlt.table(
+@dp.table(
     name="silver_person_pre_quality",
     comment="Aplica reglas de calidad a person y desvía con quarantine los KO"
 )
-@dlt.expect_all_or_quarantine(person_validation_rules)
+@dp.expect_all_or_quarantine(person_validation_rules)
 def silver_person_pre_quality():
     """
-    Lee de la tabla de bronce.
-    Aplica el diccionario 'person_validation_rules'.
-    Los KO se envían a 'silver_person_pre_quality_quarantined'.
+    Define una tabla intermedia que aplica las reglas de calidad.
+    Los registros KO se desvían a 'silver_person_pre_quality_quarantined'.
     """
-    return dlt.read_stream("bronze_person")
+    return dp.read_stream("bronze_person")
 
-@dlt.table(
+@dp.table(
     name="silver_person_ok",
     comment="Registros OK de personas, enriquecidos con fecha"
 )
 def silver_person_ok():
     """
+<<<<<<< HEAD
     Lee solo los registros OK  de la tabla anterior.
     Aplica la lógica de 'add_fields' de transformers.py.
+=======
+    Define la tabla final OK.
+    Lee solo los registros buenos  de la tabla anterior.
+    Aplica la transformación de 'add_fields' (añadir fecha).
+>>>>>>> origin/master
     """
     return (
-        dlt.read("silver_person_pre_quality")
-           .withColumn("dt", F.current_timestamp()) # 'person_ok_with_date'
+        dp.read("silver_person_pre_quality")
+           .withColumn("dt", F.current_timestamp())
     )
     
 # --- Sección EMPLEADOS ---
 
-@dlt.table(
+@dp.table(
     name="silver_employees_pre_quality",
     comment="Aplica reglas de calidad a 'employees' y desvía quarantine los KO"
 )
-@dlt.expect_all_or_quarantine(employees_validation_rules)
+@dp.expect_all_or_quarantine(employees_validation_rules)
 def silver_employees_pre_quality():
     """
-    Lee de la tabla de bronce de empleados.
-    Aplica las reglas de 'employees_validation_rules'.
-    Los KO se envían a 'silver_employees_pre_quality_quarantined'.
+    Define una tabla intermedia que aplica las reglas de calidad.
+    Los registros KO se desvían a 'silver_employees_pre_quality_quarantined'.
     """
-    return dlt.read_stream("bronze_employees")
+    return dp.read_stream("bronze_employees")
 
-@dlt.table(
+@dp.table(
     name="silver_employees_ok",
     comment="Registros OK de empleados, enriquecidos"
 )
 def silver_employees_ok():
     """
-    Lee solo los registros OK ('LIVE') de empleados.
-    (Aquí aplicarías cualquier 'add_fields' para empleados)
+    Define la tabla final OK de empleados.
+    Lee solo los registros buenos de la tabla anterior.
     """
     return (
-        dlt.read("silver_employees_pre_quality")
-           .withColumn("ingestion_dt", F.current_timestamp())
+        dp.read("silver_employees_pre_quality")
+           .withColumn("ingestion_dt", F.current_timestamp()) # Transformación de ejemplo
     )
