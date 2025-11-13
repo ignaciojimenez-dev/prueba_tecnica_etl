@@ -23,29 +23,29 @@ employees_validation_rules = {
 
 @dlt.table(
     name="bronze_person",
-    comment="Carga incremental (Auto Loader) de archivos JSON de personas"
+    comment="Carga incremental  de archivos JSON de personas"
 )
 def bronze_person():
-    """ Reemplaza a readers.py y bronze.py para 'person' """
+    """ Reemplaza a readers.py y bronze.py del otro proyecto """
     return (
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
             .option("cloudFiles.inferColumnTypes", "true")
-            .option("cloudFiles.schemaLocation", "/tmp/dlt/schemas/bronze_person") 
+            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt") 
             .load(PERSON_SOURCE_PATH)
     )
 
 @dlt.table(
     name="bronze_employees",
-    comment="Carga incremental (Auto Loader) de archivos JSON de empleados"
+    comment="Carga incremental  de archivos JSON de empleados"
 )
 def bronze_employees():
-    """ Reemplaza a readers.py y bronze.py para 'employees' """
+    """ Reemplaza a readers.py y bronze.py  """
     return (
         spark.readStream.format("cloudFiles") # type: ignore
             .option("cloudFiles.format", "json")
             .option("cloudFiles.inferColumnTypes", "true")
-            .option("cloudFiles.schemaLocation", "/tmp/dlt/schemas/bronze_employees")
+            .option("cloudFiles.schemaLocation", "/Workspace/Users/ignaqwert00@gmail.com/pipeline_root_folder_dlt")
             .load(EMPLOYEES_SOURCE_PATH)
     )
 
@@ -56,7 +56,7 @@ def bronze_employees():
 
 @dlt.table(
     name="silver_person_pre_quality",
-    comment="Aplica reglas de calidad a 'person' y desvía (quarantine) los KO"
+    comment="Aplica reglas de calidad a person y desvía con quarantine los KO"
 )
 @dlt.expect_all_or_quarantine(person_validation_rules)
 def silver_person_pre_quality():
@@ -73,7 +73,7 @@ def silver_person_pre_quality():
 )
 def silver_person_ok():
     """
-    Lee solo los registros OK ('LIVE') de la tabla anterior.
+    Lee solo los registros OK  de la tabla anterior.
     Aplica la lógica de 'add_fields' de transformers.py.
     """
     return (
@@ -85,7 +85,7 @@ def silver_person_ok():
 
 @dlt.table(
     name="silver_employees_pre_quality",
-    comment="Aplica reglas de calidad a 'employees' y desvía (quarantine) los KO"
+    comment="Aplica reglas de calidad a 'employees' y desvía quarantine los KO"
 )
 @dlt.expect_all_or_quarantine(employees_validation_rules)
 def silver_employees_pre_quality():
