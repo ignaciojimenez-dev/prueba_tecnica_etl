@@ -1,0 +1,90 @@
+# --- GENERADO AUTOMÁTICAMENTE POR JINJA2 ---
+# Dataflow: {{ dataflow.name }}
+# ------------------------------------------
+
+import pyspark.pipelines as dp
+from pyspark.sql import functions as F
+from pyspark.sql import SparkSession
+
+# Importamos los módulos de lógica reutilizable
+from src import dlt_helpers
+
+# --- 1. CAPA BRONCE (GENERADA DESDE 'sources') ---
+{% for source in dataflow.sources %}
+{% set bronze_table_name = dataflow.bronze_sinks | selectattr('input', 'equalto', source.name) | map(attribute='name') | first %}
+@dp.table(
+    name="{{ bronze_table_name }}",
+    comment="Carga incremental (Autoloader) desde {{ source.path }}"
+)
+def {{ bronze_table_name }}():
+    """ Tabla Bronze para {{ source.name }} """
+    return (
+        spark.readStream.format("cloudFiles")
+            .option("cloudFiles.format", "{{ source.format }}")
+            .option("cloudFiles.inferColumnTypes", "true")
+            #.option("cloudFiles.schemaLocation", "{{ source.schema_location }}")
+            .option("ignoreMissingFiles", "true")
+            .load("{{ source.path }}")
+    )
+
+{% endfor %}
+# --- 2. CAPA PLATA (GENERADA DESDE 'transformations_silver') ---
+
+{# Iteramos sobre las transformaciones de validación (input -> ok/ko) #}
+{% for tx in dataflow.transformations_silver if tx.type == 'validate_fields' %}
+{% set input_table = tx.params.input %}
+{% set validation_name = tx.name %}
+{% set pre_quality_table_name = "silver_pre_quality_" + input_table %}
+
+@dp.table(
+    name="{{ pre_quality_table_name }}",
+    comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
+    temporary=True {# Esta tabla es intermedia #}
+)
+@dp.expect_all(dlt_helpers.generate_validation_rules({{ tx.params.validations | tojson }}))
+def {{ pre_quality_table_name }}():
+    """ Aplica expectativas a {{ input_table }} """
+    return dp.read_stream("{{ input_table }}")
+
+{# Ahora, buscamos la transformación 'add_fields' que consume la 'ok' #}
+{% set ok_tx_input = validation_name + '_ok' %}
+{% set final_ok_tx = (dataflow.transformations_silver | selectattr('params.input', 'equalto', ok_tx_input) | first) %}
+{% set final_ok_sink = (dataflow.silver_sinks | selectattr('input', 'equalto', final_ok_tx.name) | first) %}
+
+@dp.table(
+    name="{{ final_ok_sink.name }}",
+    comment="Registros OK de {{ input_table }}, enriquecidos."
+)
+def {{ final_ok_sink.name }}():
+    """ 
+    Filtra los registros OK (sin 'quarantine') de {{ pre_quality_table_name }}
+    y aplica transformaciones finales.
+    """
+    df_ok = dp.read_stream("{{ pre_quality_table_name }}").filter("quarantine IS NULL")
+    
+    # Aplicamos las transformaciones 'add_fields'
+    return dlt_helpers.apply_silver_transformations(
+        df_ok,
+        [{{ final_ok_tx | tojson }}]
+    )
+
+{# Finalmente, creamos la tabla de descartes (KO) #}
+{% set ko_input = validation_name + '_ko' %}
+{% set ko_sink = (dataflow.silver_sinks | selectattr('input', 'equalto', ko_input) | first) %}
+
+@dp.table(
+    name="{{ ko_sink.name }}",
+    comment="Registros KO (descartados) de {{ input_table }}"
+)
+def {{ ko_sink.name }}():
+    """ 
+    Filtra los registros KO (con 'quarantine') de {{ pre_quality_table_name }}
+    para análisis de errores.
+    """
+    return (
+        dp.read_stream("{{ pre_quality_table_name }}")
+            .filter("quarantine IS NOT NULL")
+            .withColumn("ingestion_dt", F.current_timestamp())
+    )
+
+{% endfor %}

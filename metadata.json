@@ -1,0 +1,114 @@
+{
+  "dataflows": [
+    {
+      "name": "df1_persons_employees",
+      "sources": [
+        {
+          "name": "person_inputs",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/person/*",
+          "format": "JSON",
+          "schema_location": "/Volumes/workspace/elt_modular/schemas/bronze_person"
+        },
+        {
+          "name": "employees_inputs",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/employees/*",
+          "format": "JSON",
+          "schema_location": "/Volumes/workspace/elt_modular/schemas/bronze_employees"
+        }
+      ],
+      "bronze_sinks": [
+        {
+          "input": "person_inputs",
+          "name": "bronze_person"
+        },
+        {
+          "input": "employees_inputs",
+          "name": "bronze_employees"
+        }
+      ],
+      "transformations_silver": [
+        {
+          "name": "validation_person",
+          "type": "validate_fields",
+          "params": {
+            "input": "bronze_person",
+            "validations": [
+              {"field": "office", "validations": ["notEmpty"]},
+              {"field": "age", "validations": ["notNull"]}
+            ]
+          }
+        },
+        {
+          "name": "person_ok_with_date",
+          "type": "add_fields",
+          "params": {
+            "input": "validation_person_ok",
+            "addFields": [{"name": "dt", "function": "current_timestamp"}]
+          }
+        }
+      ],
+      "silver_sinks": [
+        {
+          "input": "person_ok_with_date",
+          "name": "silver_person_ok"
+        },
+        {
+          "input": "validation_person_ko",
+          "name": "discards_person_ko"
+        }
+      ],
+      "transformations_gold": []
+    },
+    {
+      "name": "df2_polizas",
+      "sources": [
+        {
+          "name": "polizas_inputs",
+          "path": "/Volumes/workspace/elt_modular/data/inputs/events/polizas/*",
+          "format": "JSON",
+          "schema_location": "/Volumes/workspace/elt_modular/schemas/bronze_polizas"
+        }
+      ],
+      "bronze_sinks": [
+        {
+          "input": "polizas_inputs",
+          "name": "bronze_polizas"
+        }
+      ],
+      "transformations_silver": [
+        {
+          "name": "validation_polizas",
+          "type": "validate_fields",
+          "params": {
+            "input": "polizas_inputs",
+            "validations": [
+              {"field": "policy_id", "validations": ["notEmpty"]},
+              {"field": "premium", "validations": ["notNull"]}
+            ]
+          }
+        },
+        {
+          "name": "polizas_ok_with_date",
+          "type": "add_fields",
+          "params": {
+            "input": "validation_polizas_ok",
+            "addFields": [
+              {"name": "dt_ingestion", "function": "current_timestamp"}
+            ]
+          }
+        }
+      ],
+      "silver_sinks": [
+        {
+          "input": "polizas_ok_with_date",
+          "name": "silver_polizas_ok"
+        },
+        {
+          "input": "validation_polizas_ko",
+          "name": "discards_polizas_ko"
+        }
+      ],
+      "transformations_gold": []
+    }
+  ]
+}

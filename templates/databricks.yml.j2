@@ -1,0 +1,55 @@
+# --- GENERADO AUTOMÁTICAMENTE POR JINJA2 ---
+# Bundle para el framework modular DLT
+
+bundle:
+  name: "framework-dlt-generado"
+
+workspace:
+  root_path: "/Users/${workspace.current_user.userName}/framework-dlt/${bundle.name}"
+
+# Lista los artefactos a desplegar
+artifacts:
+  # El módulo de helpers
+  - path: "src/dlt_helpers.py"
+    destination: "/${bundle.target}/src"
+  # Los pipelines generados (RUTA ACTUALIZADA)
+  - path: "pipelines_generadas/"
+    destination: "/${bundle.target}/pipelines_generadas"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      pass
+    
+    resources:
+      pipelines:
+        {% for df in dataflows %}
+        dlt_{{ df.name }}:
+          name: "DLT - {{ df.name }}"
+          development: true
+          libraries:
+            # Apunta al notebook DLT en la carpeta de destino (RUTA ACTUALIZADA)
+            - notebook: { path: "/${bundle.target}/pipelines_generadas/dlt_{{ df.name }}.py" }
+          # ¡IMPORTANTE! Ajusta esto a tu Unity Catalog
+          storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/{{ df.name }}"
+          target: "workspace"
+          schema: "elt_modular_dlt"
+        {% endfor %}
+
+      jobs:
+        mega_job_all_pipelines:
+          name: "Mega Job - Todos los Dataflows"
+          tasks:
+            {% for df in dataflows %}
+            - task_key: "run_dlt_{{ df.name }}"
+              description: "Ejecuta el pipeline DLT para {{ df.name }}"
+              pipeline_task:
+                pipeline_id: "${resources.pipelines.dlt_{{ df.name }}.id}"
+              # Opcional: descomenta para ejecutar en secuencia
+              # {% if not loop.first %}
+              # depends_on:
+              #   - task_key: "run_dlt_{{ loop.previtem.name }}"
+              # {% endif %}
+            {% endfor %}
