@@ -40,7 +40,6 @@ def {{ bronze_table_name }}():
 @dp.table(
     name="{{ pre_quality_table_name }}",
     comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
-    temporary=True {# Esta tabla es intermedia #}
 )
 @dp.expect_all(dlt_helpers.generate_validation_rules({{ tx.params.validations | tojson }}))
 def {{ pre_quality_table_name }}():
