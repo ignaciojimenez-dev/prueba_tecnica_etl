@@ -48,7 +48,7 @@ def bronze_employees():
     name="silver_pre_quality_bronze_person",
     comment="Aplica reglas de calidad DLT a la tabla bronze_person",
 )
-@dp.expect_all(dlt_helpers.generate_validation_rules([{"field": "office", "validations": ["notEmpty"]}, {"field": "age", "validations": ["notNull"]}]))
+@dp.expect_all(dlt_helpers.generate_validation_rules([{'field': 'office', 'validations': ['notEmpty']}, {'field': 'age', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_person():
     """ Aplica expectativas a bronze_person """
     return dp.read_stream("bronze_person")

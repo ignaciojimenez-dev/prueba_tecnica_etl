@@ -41,7 +41,7 @@ def {{ bronze_table_name }}():
     name="{{ pre_quality_table_name }}",
     comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
 )
-@dp.expect_all(dlt_helpers.generate_validation_rules({{ tx.params.validations | tojson }}))
+@dp.expect_all(dlt_helpers.generate_validation_rules({{ tx.params.validations }}))
 def {{ pre_quality_table_name }}():
     """ Aplica expectativas a {{ input_table }} """
     return dp.read_stream("{{ input_table }}")
