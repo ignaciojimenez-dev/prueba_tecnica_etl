@@ -29,7 +29,7 @@ targets:
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_df1_persons_employees.py" }
-          storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/df1_persons_employees"
+          #storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/df1_persons_employees"
           catalog: "workspace"
           schema: "elt_modular_dlt"
         dlt_df2_polizas:
@@ -38,7 +38,7 @@ targets:
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_df2_polizas.py" }
-          storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/df2_polizas"
+          #storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/df2_polizas"
           catalog: "workspace"
           schema: "elt_modular_dlt"
 

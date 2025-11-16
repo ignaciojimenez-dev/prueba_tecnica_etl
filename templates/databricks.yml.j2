@@ -30,7 +30,7 @@ targets:
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_{{ df.name }}.py" }
-          storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/{{ df.name }}"
+          #storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/{{ df.name }}"
           catalog: "workspace"
           schema: "elt_modular_dlt"
         {% endfor %}
