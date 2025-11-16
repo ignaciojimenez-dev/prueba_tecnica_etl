@@ -46,8 +46,8 @@ targets:
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_{{ df.name }}.id}"
               # Lógica de secuencia (Corregida)
-              {% if not loop.first %}
-              depends_on:
-                - task_key: "run_dlt_{{ loop.previtem.name }}"
-              {% endif %}
+              #{% if not loop.first %}
+              #depends_on:
+              #  - task_key: "run_dlt_{{ loop.previtem.name }}"
+              #{% endif %}
             {% endfor %}

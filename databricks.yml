@@ -53,10 +53,11 @@ targets:
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df1_persons_employees.id}"
               # Lógica de secuencia (Corregida)
-            - task_key: "run_dlt_df2_polizas"
+              #            - task_key: "run_dlt_df2_polizas"
               description: "Ejecuta el pipeline DLT para df2_polizas"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df2_polizas.id}"
               # Lógica de secuencia (Corregida)
-              depends_on:
-                - task_key: "run_dlt_df1_persons_employees"
+              #              #depends_on:
+              #  - task_key: "run_dlt_df1_persons_employees"
+              #
