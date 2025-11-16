@@ -38,16 +38,13 @@ targets:
 
       jobs:
         mega_job_all_pipelines:
-          name: "Mega Job - Todos los Dataflows"
+          name: "JOB Orquestador - Todos los Dataflows"
           tasks:
+            # Bucle FOR para crear una tarea POR dataflow
             {% for df in dataflows %}
             - task_key: "run_dlt_{{ df.name }}"
               description: "Ejecuta el pipeline DLT para {{ df.name }}"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_{{ df.name }}.id}"
-              # Lógica de secuencia (Corregida)
-              #{% if not loop.first %}
-              #depends_on:
-              #  - task_key: "run_dlt_{{ loop.previtem.name }}"
-              #{% endif %}
+              # ¡No hay 'depends_on', todo se ejecuta en paralelo!
             {% endfor %}

@@ -46,18 +46,16 @@ targets:
 
       jobs:
         mega_job_all_pipelines:
-          name: "Mega Job - Todos los Dataflows"
+          name: "JOB Orquestador - Todos los Dataflows"
           tasks:
+            # Bucle FOR para crear una tarea POR dataflow
             - task_key: "run_dlt_df1_persons_employees"
               description: "Ejecuta el pipeline DLT para df1_persons_employees"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df1_persons_employees.id}"
-              # Lógica de secuencia (Corregida)
-              #            - task_key: "run_dlt_df2_polizas"
+              # ¡No hay 'depends_on', todo se ejecuta en paralelo!
+            - task_key: "run_dlt_df2_polizas"
               description: "Ejecuta el pipeline DLT para df2_polizas"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df2_polizas.id}"
-              # Lógica de secuencia (Corregida)
-              #              #depends_on:
-              #  - task_key: "run_dlt_df1_persons_employees"
-              #
+              # ¡No hay 'depends_on', todo se ejecuta en paralelo!
