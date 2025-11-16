@@ -27,6 +27,7 @@ targets:
         dlt_{{ df.name }}:
           name: "DLT - {{ df.name }}"
           #development: true
+          serverless: true
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_{{ df.name }}.py" }
