@@ -80,7 +80,7 @@
           "name": "validation_polizas",
           "type": "validate_fields",
           "params": {
-            "input": "polizas_inputs",
+            "input": "bronze_polizas",
             "validations": [
               {"field": "policy_id", "validations": ["notEmpty"]},
               {"field": "premium", "validations": ["notNull"]}
