@@ -48,10 +48,9 @@ def silver_polizas_ok():
     Lee los registros que pasaron la calidad de silver_pre_quality_bronze_polizas
     y aplica transformaciones finales.
     """
-    # --- Eliminamos el .filter("quarantine IS NULL") ---
+    # --- sin filter quarentine , mirar si se puede aplicar ---
     df_ok = dp.read_stream("silver_pre_quality_bronze_polizas")
     
-    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
     # Usamos la nueva función genérica 'apply_transformations'
     return dlt_helpers.apply_transformations(
         df_ok,

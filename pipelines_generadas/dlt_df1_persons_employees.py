@@ -62,10 +62,9 @@ def silver_person_ok():
     Lee los registros que pasaron la calidad de silver_pre_quality_bronze_person
     y aplica transformaciones finales.
     """
-    # --- Eliminamos el .filter("quarantine IS NULL") ---
+    # --- sin filter quarentine , mirar si se puede aplicar ---
     df_ok = dp.read_stream("silver_pre_quality_bronze_person")
     
-    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
     # Usamos la nueva función genérica 'apply_transformations'
     return dlt_helpers.apply_transformations(
         df_ok,
