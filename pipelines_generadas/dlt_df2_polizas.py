@@ -32,7 +32,7 @@ def bronze_polizas():
 @dp.table(
     name="silver_pre_quality_polizas_inputs",
     comment="Aplica reglas de calidad DLT a la tabla polizas_inputs",
-    temporary=True )
+)
 @dp.expect_all(dlt_helpers.generate_validation_rules([{"field": "policy_id", "validations": ["notEmpty"]}, {"field": "premium", "validations": ["notNull"]}]))
 def silver_pre_quality_polizas_inputs():
     """ Aplica expectativas a polizas_inputs """
