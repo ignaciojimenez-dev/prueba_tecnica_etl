@@ -30,27 +30,27 @@ def bronze_polizas():
 
 
 @dp.table(
-    name="silver_pre_quality_polizas_inputs",
-    comment="Aplica reglas de calidad DLT a la tabla polizas_inputs",
+    name="silver_pre_quality_bronze_polizas",
+    comment="Aplica reglas de calidad DLT a la tabla bronze_polizas",
 )
 # --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'policy_id', 'validations': ['notEmpty']}, {'field': 'premium', 'validations': ['notNull']}]))
-def silver_pre_quality_polizas_inputs():
-    """ Aplica expectativas y descarta registros malos de polizas_inputs """
-    return dp.read_stream("polizas_inputs")
+def silver_pre_quality_bronze_polizas():
+    """ Aplica expectativas y descarta registros malos de bronze_polizas """
+    return dp.read_stream("bronze_polizas")
 
 
 @dp.table(
     name="silver_polizas_ok",
-    comment="Registros OK de polizas_inputs, enriquecidos."
+    comment="Registros OK de bronze_polizas, enriquecidos."
 )
 def silver_polizas_ok():
     """ 
-    Lee los registros que pasaron la calidad de silver_pre_quality_polizas_inputs
+    Lee los registros que pasaron la calidad de silver_pre_quality_bronze_polizas
     y aplica transformaciones finales.
     """
     # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
-    df_ok = dp.read_stream("silver_pre_quality_polizas_inputs")
+    df_ok = dp.read_stream("silver_pre_quality_bronze_polizas")
     
     # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
     return dlt_helpers.apply_silver_transformations(
