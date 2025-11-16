@@ -30,7 +30,7 @@ def {{ bronze_table_name }}():
 {% endfor %}
 # --- 2. CAPA PLATA (GENERADA DESDE 'transformations_silver') ---
 
-{# Iteramos sobre las transformaciones de validación (input -> ok/ko) #}
+{# Iteramos sobre las transformaciones de validacion #}
 {% for tx in dataflow.transformations_silver if tx.type == 'validate_fields' %}
 {% set input_table = tx.params.input %}
 {% set validation_name = tx.name %}
@@ -46,7 +46,7 @@ def {{ pre_quality_table_name }}():
     """ Aplica expectativas y descarta registros malos de {{ input_table }} """
     return dp.read_stream("{{ input_table }}")
 
-{# Ahora, buscamos la transformación 'add_fields' que consume la 'ok' #}
+{#  transformación 'add_fields' para 'ok' #}
 {% set ok_tx_input = validation_name + '_ok' %}
 {% set final_ok_tx = (dataflow.transformations_silver | selectattr('params.input', 'equalto', ok_tx_input) | first) %}
 {% set final_ok_sink = (dataflow.silver_sinks | selectattr('input', 'equalto', final_ok_tx.name) | first) %}
@@ -60,10 +60,9 @@ def {{ final_ok_sink.name }}():
     Lee los registros que pasaron la calidad de {{ pre_quality_table_name }}
     y aplica transformaciones finales.
     """
-    # --- Eliminamos el .filter("quarantine IS NULL") ---
+    # --- sin filter quarentine , mirar si se puede aplicar ---
     df_ok = dp.read_stream("{{ pre_quality_table_name }}")
     
-    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
     # Usamos la nueva función genérica 'apply_transformations'
     return dlt_helpers.apply_transformations(
         df_ok,
@@ -82,7 +81,7 @@ def {{ final_ok_sink.name }}():
 {# Iteramos sobre las transformaciones de ORO #}
 {% for tx in dataflow.transformations_gold %}
 {% set input_table = tx.params.input %} {# ej: "silver_person_ok" #}
-{% set transform_name = tx.name %} {# ej: "mask_person_pii" #}
+{% set transform_name = tx.name %} {# ej: "mask_person_pii" masking#}
 {% set gold_sink = (dataflow.gold_sinks | selectattr('input', 'equalto', transform_name) | first) %}
 
 @dp.table(

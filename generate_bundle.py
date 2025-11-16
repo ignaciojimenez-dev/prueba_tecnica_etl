@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 log = logging.getLogger(__name__)
 
-# --- Configuración de Rutas (ACTUALIZADA) ---
+# --- Rutas  ---
 METADATA_PATH = "metadata.json"
 # 1. Lee las plantillas desde la carpeta /templates
 TEMPLATES_DIR = "templates"

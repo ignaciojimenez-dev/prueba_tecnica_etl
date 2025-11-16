@@ -1,11 +1,15 @@
 # src/dlt_helpers.py
+
+# se generan el codigo sql para dlt en las valadaciones que pasa a expect
+# para transformaciones recibe dataframe y devuelve otro aplicando transformaciones
+# modular para añadir validaciones y transforamcions facil si llega en el metadata
 import logging
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 log = logging.getLogger(__name__)
 
-# --- 1. Generador de Reglas de Validación (como pediste) ---
+# --- 1. Generador de Reglas de Validación ---
 
 def _get_dlt_expression(validation_name: str, col_name: str) -> str:
     """
@@ -17,30 +21,25 @@ def _get_dlt_expression(validation_name: str, col_name: str) -> str:
     elif validation_name == 'notEmpty':
         return f"{col_name} IS NOT NULL AND {col_name} != ''"
     
-    # --- Añadir más reglas aquí ---
+    # --- Añadir mas reglas aquí ---
     # elif validation_name == 'isEmail':
     #     return f"regexp_like({col_name}, '^[a-zA-Z0-9._%+-]+...')"
 
     else:
         log.warning(f"Regla DLT desconocida '{validation_name}'. Ignorando.")
-        return "1=1" # Devuelve una expresión 'True' para no fallar
+        return "1=1" # devuelve sql true para qu eno falle el dlt
 
 def generate_validation_rules(metadata_rules: list) -> dict:
     """
     Convierte la lista de validaciones del metadata en el diccionario
     que DLT espera para @dp.expect_all().
     
-    Input:
-    [
-      {"field": "office", "validations": ["notEmpty"]},
-      {"field": "age", "validations": ["notNull"]}
-    ]
+    Input: [ {"field": "office", "validations": ["notEmpty"]}, 
+             {"field": "age", "validations": ["notNull"]}     ]
     
-    Output:
-    {
+    Output: {
       "expect_office_notEmpty": "office IS NOT NULL AND office != ''",
-      "expect_age_notNull": "age IS NOT NULL"
-    }
+      "expect_age_notNull": "age IS NOT NULL"  }
     """
     dlt_rules = {}
     for rule_set in metadata_rules:
@@ -48,7 +47,7 @@ def generate_validation_rules(metadata_rules: list) -> dict:
         validations_to_apply = rule_set['validations']
         
         for val_name in validations_to_apply:
-            rule_key = f"expect_{field_name}_{val_name}" # Nombre único para la regla
+            rule_key = f"expect_{field_name}_{val_name}" 
             rule_expression = _get_dlt_expression(val_name, field_name)
             dlt_rules[rule_key] = rule_expression
             
@@ -65,15 +64,14 @@ def apply_transformations(df: DataFrame, transform_configs: list) -> DataFrame:
     temp_df = df
     
     for tx_config in transform_configs:
-        # Usamos .get('type') para que no falle si no existe
+        # get para generar try sino hay
         tx_type = tx_config.get('type')
-        # Pasamos solo los 'params' a las sub-funciones
         params = tx_config.get('params', {}) 
         
         if tx_type == 'add_fields':
             temp_df = _apply_add_fields(temp_df, params)
         
-        # --- ¡LÓGICA NUEVA! ---
+        # --- masking---
         elif tx_type == 'apply_masking':
             temp_df = _apply_data_masking(temp_df, params)
         # -------------------------
@@ -120,7 +118,6 @@ def _apply_data_masking(df: DataFrame, params: dict) -> DataFrame:
         if field in temp_df.columns:
             if func == 'sha2':
                 log.info(f"Aplicando máscara SHA2 al campo '{field}'")
-                # F.col(field).cast("string") es importante por si el campo no es string
                 temp_df = temp_df.withColumn(field, F.sha2(F.col(field).cast("string"), 256))
             
             elif func == 'md5':
