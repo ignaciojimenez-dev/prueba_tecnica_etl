@@ -25,7 +25,7 @@ targets:
       pipelines:
         dlt_df1_persons_employees:
           name: "DLT - df1_persons_employees"
-          development: true
+          #development: true
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_df1_persons_employees.py" }
@@ -34,7 +34,7 @@ targets:
           schema: "elt_modular_dlt"
         dlt_df2_polizas:
           name: "DLT - df2_polizas"
-          development: true
+          #development: true
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_df2_polizas.py" }

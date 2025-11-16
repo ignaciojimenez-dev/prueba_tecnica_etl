@@ -26,7 +26,7 @@ targets:
         {% for df in dataflows %}
         dlt_{{ df.name }}:
           name: "DLT - {{ df.name }}"
-          development: true
+          #development: true
           libraries:
             # El path es ahora relativo al root_path de arriba
             - notebook: { path: "pipelines_generadas/dlt_{{ df.name }}.py" }
