@@ -48,9 +48,10 @@ def bronze_employees():
     name="silver_pre_quality_bronze_person",
     comment="Aplica reglas de calidad DLT a la tabla bronze_person",
 )
-@dp.expect_all(dlt_helpers.generate_validation_rules([{'field': 'office', 'validations': ['notEmpty']}, {'field': 'age', 'validations': ['notNull']}]))
+# --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
+@dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'office', 'validations': ['notEmpty']}, {'field': 'age', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_person():
-    """ Aplica expectativas a bronze_person """
+    """ Aplica expectativas y descarta registros malos de bronze_person """
     return dp.read_stream("bronze_person")
 
 
@@ -60,30 +61,15 @@ def silver_pre_quality_bronze_person():
 )
 def silver_person_ok():
     """ 
-    Filtra los registros OK (sin 'quarantine') de silver_pre_quality_bronze_person
+    Lee los registros que pasaron la calidad de silver_pre_quality_bronze_person
     y aplica transformaciones finales.
     """
-    df_ok = dp.read_stream("silver_pre_quality_bronze_person").filter("quarantine IS NULL")
+    # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
+    df_ok = dp.read_stream("silver_pre_quality_bronze_person")
     
-    # Aplicamos las transformaciones 'add_fields'
+    # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
     return dlt_helpers.apply_silver_transformations(
         df_ok,
         [{"name": "person_ok_with_date", "params": {"addFields": [{"function": "current_timestamp", "name": "dt"}], "input": "validation_person_ok"}, "type": "add_fields"}]
-    )
-
-
-@dp.table(
-    name="discards_person_ko",
-    comment="Registros KO (descartados) de bronze_person"
-)
-def discards_person_ko():
-    """ 
-    Filtra los registros KO (con 'quarantine') de silver_pre_quality_bronze_person
-    para análisis de errores.
-    """
-    return (
-        dp.read_stream("silver_pre_quality_bronze_person")
-            .filter("quarantine IS NOT NULL")
-            .withColumn("ingestion_dt", F.current_timestamp())
     )
 

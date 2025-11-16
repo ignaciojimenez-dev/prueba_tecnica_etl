@@ -41,9 +41,10 @@ def {{ bronze_table_name }}():
     name="{{ pre_quality_table_name }}",
     comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
 )
-@dp.expect_all(dlt_helpers.generate_validation_rules({{ tx.params.validations }}))
+# --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
+@dp.expect_all_or_drop(dlt_helpers.generate_validation_rules({{ tx.params.validations }}))
 def {{ pre_quality_table_name }}():
-    """ Aplica expectativas a {{ input_table }} """
+    """ Aplica expectativas y descarta registros malos de {{ input_table }} """
     return dp.read_stream("{{ input_table }}")
 
 {# Ahora, buscamos la transformación 'add_fields' que consume la 'ok' #}
@@ -57,34 +58,20 @@ def {{ pre_quality_table_name }}():
 )
 def {{ final_ok_sink.name }}():
     """ 
-    Filtra los registros OK (sin 'quarantine') de {{ pre_quality_table_name }}
+    Lee los registros que pasaron la calidad de {{ pre_quality_table_name }}
     y aplica transformaciones finales.
     """
-    df_ok = dp.read_stream("{{ pre_quality_table_name }}").filter("quarantine IS NULL")
+    # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
+    df_ok = dp.read_stream("{{ pre_quality_table_name }}")
     
-    # Aplicamos las transformaciones 'add_fields'
+    # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
     return dlt_helpers.apply_silver_transformations(
         df_ok,
         [{{ final_ok_tx | tojson }}]
     )
-
-{# Finalmente, creamos la tabla de descartes (KO) #}
-{% set ko_input = validation_name + '_ko' %}
-{% set ko_sink = (dataflow.silver_sinks | selectattr('input', 'equalto', ko_input) | first) %}
-
-@dp.table(
-    name="{{ ko_sink.name }}",
-    comment="Registros KO (descartados) de {{ input_table }}"
-)
-def {{ ko_sink.name }}():
-    """ 
-    Filtra los registros KO (con 'quarantine') de {{ pre_quality_table_name }}
-    para análisis de errores.
-    """
-    return (
-        dp.read_stream("{{ pre_quality_table_name }}")
-            .filter("quarantine IS NOT NULL")
-            .withColumn("ingestion_dt", F.current_timestamp())
-    )
+{# 
+   Al usar 'expect_all_or_drop', los registros malos se descartan 
+   y no pueden ser capturados en una tabla de KO.
+#}
 
 {% endfor %}
