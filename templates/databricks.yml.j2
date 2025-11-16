@@ -1,27 +1,25 @@
-# --- GENERADO AUTOMÁTICAMENTE POR JINJA2 ---
-# Bundle para el framework modular DLT
+# --- PLANTILLA YML.J2 (CORREGIDA) ---
+# Usa 'sync.include:' y la ruta de tu workspace
 
 bundle:
   name: "framework-dlt-generado"
 
+# ¡Ruta REAL de tu proyecto en Databricks Repos!
 workspace:
-  root_path: "/Users/${workspace.current_user.userName}/framework-dlt/${bundle.name}"
+  root_path: "/Workspace/Users/ignaqwert00@gmail.com/prueba_tecnica_etl"
 
-# Lista los artefactos a desplegar
-artifacts:
-  # El módulo de helpers
-  - path: "src/dlt_helpers.py"
-    destination: "/${bundle.target}/src"
-  # Los pipelines generados (RUTA ACTUALIZADA)
-  - path: "pipelines_generadas/"
-    destination: "/${bundle.target}/pipelines_generadas"
+# ¡LA CORRECCIÓN ESTÁ AQUÍ!
+# Usamos 'sync.include' para SINCRONIZAR ficheros .py
+sync:
+  include:
+    - "src/dlt_helpers.py"
+    - "pipelines_generadas/*.py" # Incluye todos los .py generados
 
 targets:
   dev:
     mode: development
     default: true
-    workspace:
-      pass
+    workspace: {} # Limpio y vacío
     
     resources:
       pipelines:
@@ -30,9 +28,8 @@ targets:
           name: "DLT - {{ df.name }}"
           development: true
           libraries:
-            # Apunta al notebook DLT en la carpeta de destino (RUTA ACTUALIZADA)
-            - notebook: { path: "/${bundle.target}/pipelines_generadas/dlt_{{ df.name }}.py" }
-          # ¡IMPORTANTE! Ajusta esto a tu Unity Catalog
+            # El path es ahora relativo al root_path de arriba
+            - notebook: { path: "pipelines_generadas/dlt_{{ df.name }}.py" }
           storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/{{ df.name }}"
           target: "workspace"
           schema: "elt_modular_dlt"
@@ -47,9 +44,9 @@ targets:
               description: "Ejecuta el pipeline DLT para {{ df.name }}"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_{{ df.name }}.id}"
-              # Opcional: descomenta para ejecutar en secuencia
-              # {% if not loop.first %}
-              # depends_on:
-              #   - task_key: "run_dlt_{{ loop.previtem.name }}"
-              # {% endif %}
+              # Lógica de secuencia (Corregida)
+              {% if not loop.first %}
+              depends_on:
+                - task_key: "run_dlt_{{ loop.previtem.name }}"
+              {% endif %}
             {% endfor %}
