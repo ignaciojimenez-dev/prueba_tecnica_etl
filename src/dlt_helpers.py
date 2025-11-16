@@ -57,18 +57,29 @@ def generate_validation_rules(metadata_rules: list) -> dict:
 
 # --- 2. Aplicador de Transformaciones ---
 
-def apply_silver_transformations(df: DataFrame, transform_configs: list) -> DataFrame:
+def apply_transformations(df: DataFrame, transform_configs: list) -> DataFrame:
     """
-    Aplica una lista de transformaciones (ej: add_fields) a un DataFrame.
+    Aplica una lista de transformaciones (ej: add_fields, apply_masking) 
+    a un DataFrame.
     """
     temp_df = df
     
     for tx_config in transform_configs:
-        if tx_config['type'] == 'add_fields':
-            temp_df = _apply_add_fields(temp_df, tx_config['params'])
-        # --- Añadir más tipos de transformación aquí ---
-        # elif tx_config['type'] == 'rename_cols':
-        #     temp_df = _apply_rename_cols(temp_df, tx_config['params'])
+        # Usamos .get('type') para que no falle si no existe
+        tx_type = tx_config.get('type')
+        # Pasamos solo los 'params' a las sub-funciones
+        params = tx_config.get('params', {}) 
+        
+        if tx_type == 'add_fields':
+            temp_df = _apply_add_fields(temp_df, params)
+        
+        # --- ¡LÓGICA NUEVA! ---
+        elif tx_type == 'apply_masking':
+            temp_df = _apply_data_masking(temp_df, params)
+        # -------------------------
+            
+        else:
+            log.warning(f"Tipo de transformación '{tx_type}' no reconocido. Omitiendo.")
             
     return temp_df
 
@@ -91,4 +102,38 @@ def _apply_add_fields(df: DataFrame, params: dict) -> DataFrame:
         else:
             log.warning(f"Función '{col_function}' no reconocida para '{col_name}'.")
 
+    return temp_df
+
+
+def _apply_data_masking(df: DataFrame, params: dict) -> DataFrame:
+    """
+    Aplica enmascaramiento de datos simple (SHA2, MD5) a las columnas.
+    """
+    rules = params.get('masking_rules', [])
+    temp_df = df
+    
+    for rule in rules:
+        field = rule['field']
+        func = rule['function']
+        
+        # Comprobamos que la columna existe antes de intentar enmascararla
+        if field in temp_df.columns:
+            if func == 'sha2':
+                log.info(f"Aplicando máscara SHA2 al campo '{field}'")
+                # F.col(field).cast("string") es importante por si el campo no es string
+                temp_df = temp_df.withColumn(field, F.sha2(F.col(field).cast("string"), 256))
+            
+            elif func == 'md5':
+                log.info(f"Aplicando máscara MD5 al campo '{field}'")
+                temp_df = temp_df.withColumn(field, F.md5(F.col(field).cast("string")))
+            
+            # --- Añade más funciones de masking aquí ---
+            # elif func == 'redact':
+            #    temp_df = temp_df.withColumn(field, F.lit("REDACTED"))
+            
+            else:
+                log.warning(f"Función de masking '{func}' no reconocida para '{field}'.")
+        else:
+            log.warning(f"Campo '{field}' no encontrado en el DataFrame. Omitiendo masking.")
+            
     return temp_df

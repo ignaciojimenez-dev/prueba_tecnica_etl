@@ -51,13 +51,27 @@
         {
           "input": "person_ok_with_date",
           "name": "silver_person_ok"
-        },
-        {
-          "input": "validation_person_ko",
-          "name": "discards_person_ko"
         }
       ],
-      "transformations_gold": []
+      "transformations_gold": [
+        {
+          "name": "mask_person_pii",
+          "type": "apply_masking",
+          "params": {
+            "input": "silver_person_ok",
+            "masking_rules": [
+              {"field": "email", "function": "sha2"},
+              {"field": "name", "function": "md5"}
+            ]
+          }
+        }
+      ],
+      "gold_sinks": [
+        {
+          "input": "mask_person_pii",
+          "name": "gold_persons_anonymized"
+        }
+      ]
     },
     {
       "name": "df2_polizas",
@@ -102,10 +116,6 @@
         {
           "input": "polizas_ok_with_date",
           "name": "silver_polizas_ok"
-        },
-        {
-          "input": "validation_polizas_ko",
-          "name": "discards_polizas_ko"
         }
       ],
       "transformations_gold": []

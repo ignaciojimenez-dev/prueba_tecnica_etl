@@ -21,7 +21,6 @@ def bronze_person():
         spark.readStream.format("cloudFiles")
             .option("cloudFiles.format", "JSON")
             .option("cloudFiles.inferColumnTypes", "true")
-            #.option("cloudFiles.schemaLocation", "/Volumes/workspace/elt_modular/schemas/bronze_person")
             .option("ignoreMissingFiles", "true")
             .load("/Volumes/workspace/elt_modular/data/inputs/events/person/*")
     )
@@ -36,7 +35,6 @@ def bronze_employees():
         spark.readStream.format("cloudFiles")
             .option("cloudFiles.format", "JSON")
             .option("cloudFiles.inferColumnTypes", "true")
-            #.option("cloudFiles.schemaLocation", "/Volumes/workspace/elt_modular/schemas/bronze_employees")
             .option("ignoreMissingFiles", "true")
             .load("/Volumes/workspace/elt_modular/data/inputs/events/employees/*")
     )
@@ -48,7 +46,7 @@ def bronze_employees():
     name="silver_pre_quality_bronze_person",
     comment="Aplica reglas de calidad DLT a la tabla bronze_person",
 )
-# --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
+# --- Usamos 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'office', 'validations': ['notEmpty']}, {'field': 'age', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_person():
     """ Aplica expectativas y descarta registros malos de bronze_person """
@@ -64,12 +62,35 @@ def silver_person_ok():
     Lee los registros que pasaron la calidad de silver_pre_quality_bronze_person
     y aplica transformaciones finales.
     """
-    # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
+    # --- Eliminamos el .filter("quarantine IS NULL") ---
     df_ok = dp.read_stream("silver_pre_quality_bronze_person")
     
-    # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
-    return dlt_helpers.apply_silver_transformations(
+    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
+    # Usamos la nueva función genérica 'apply_transformations'
+    return dlt_helpers.apply_transformations(
         df_ok,
         [{"name": "person_ok_with_date", "params": {"addFields": [{"function": "current_timestamp", "name": "dt"}], "input": "validation_person_ok"}, "type": "add_fields"}]
+    )
+
+
+
+# --- 3. CAPA ORO (GENERADA DESDE 'transformations_gold') ---
+
+  
+@dp.table(
+    name="gold_persons_anonymized",     comment="Capa Oro: mask_person_pii"
+)
+def gold_persons_anonymized():
+    """
+    Lee desde la capa Plata (silver_person_ok) 
+    y aplica transformaciones de Oro (mask_person_pii).
+    """
+    df_silver = dp.read_stream("silver_person_ok")
+    
+    # ¡Reutilizamos la MISMA función helper genérica!
+    # Pasamos la configuración de 'apply_masking'
+    return dlt_helpers.apply_transformations(
+        df_silver,
+        [{"name": "mask_person_pii", "params": {"input": "silver_person_ok", "masking_rules": [{"field": "email", "function": "sha2"}, {"field": "name", "function": "md5"}]}, "type": "apply_masking"}]
     )
 

@@ -23,7 +23,6 @@ def {{ bronze_table_name }}():
         spark.readStream.format("cloudFiles")
             .option("cloudFiles.format", "{{ source.format }}")
             .option("cloudFiles.inferColumnTypes", "true")
-            #.option("cloudFiles.schemaLocation", "{{ source.schema_location }}")
             .option("ignoreMissingFiles", "true")
             .load("{{ source.path }}")
     )
@@ -41,7 +40,7 @@ def {{ bronze_table_name }}():
     name="{{ pre_quality_table_name }}",
     comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
 )
-# --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
+# --- Usamos 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules({{ tx.params.validations }}))
 def {{ pre_quality_table_name }}():
     """ Aplica expectativas y descarta registros malos de {{ input_table }} """
@@ -61,17 +60,47 @@ def {{ final_ok_sink.name }}():
     Lee los registros que pasaron la calidad de {{ pre_quality_table_name }}
     y aplica transformaciones finales.
     """
-    # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
+    # --- Eliminamos el .filter("quarantine IS NULL") ---
     df_ok = dp.read_stream("{{ pre_quality_table_name }}")
     
-    # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
-    return dlt_helpers.apply_silver_transformations(
+    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
+    # Usamos la nueva función genérica 'apply_transformations'
+    return dlt_helpers.apply_transformations(
         df_ok,
         [{{ final_ok_tx | tojson }}]
     )
 {# 
-   Al usar 'expect_all_or_drop', los registros malos se descartan 
-   y no pueden ser capturados en una tabla de KO.
+    Al usar 'expect_all_or_drop', los registros malos se descartan 
+    y no pueden ser capturados en una tabla de KO.
 #}
+
+{% endfor %}
+
+
+# --- 3. CAPA ORO (GENERADA DESDE 'transformations_gold') ---
+
+{# Iteramos sobre las transformaciones de ORO #}
+{% for tx in dataflow.transformations_gold %}
+{% set input_table = tx.params.input %} {# ej: "silver_person_ok" #}
+{% set transform_name = tx.name %} {# ej: "mask_person_pii" #}
+{% set gold_sink = (dataflow.gold_sinks | selectattr('input', 'equalto', transform_name) | first) %}
+
+@dp.table(
+    name="{{ gold_sink.name }}", {# ej: "gold_persons_anonymized" #}
+    comment="Capa Oro: {{ transform_name }}"
+)
+def {{ gold_sink.name }}():
+    """
+    Lee desde la capa Plata ({{ input_table }}) 
+    y aplica transformaciones de Oro ({{ transform_name }}).
+    """
+    df_silver = dp.read_stream("{{ input_table }}")
+    
+    # ¡Reutilizamos la MISMA función helper genérica!
+    # Pasamos la configuración de 'apply_masking'
+    return dlt_helpers.apply_transformations(
+        df_silver,
+        [{{ tx | tojson }}]
+    )
 
 {% endfor %}

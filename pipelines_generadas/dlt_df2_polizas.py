@@ -21,7 +21,6 @@ def bronze_polizas():
         spark.readStream.format("cloudFiles")
             .option("cloudFiles.format", "JSON")
             .option("cloudFiles.inferColumnTypes", "true")
-            #.option("cloudFiles.schemaLocation", "/Volumes/workspace/elt_modular/schemas/bronze_polizas")
             .option("ignoreMissingFiles", "true")
             .load("/Volumes/workspace/elt_modular/data/inputs/events/polizas/*")
     )
@@ -33,7 +32,7 @@ def bronze_polizas():
     name="silver_pre_quality_bronze_polizas",
     comment="Aplica reglas de calidad DLT a la tabla bronze_polizas",
 )
-# --- CAMBIO 1: Usamos 'expect_all_or_drop' y el helper ---
+# --- Usamos 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'policy_id', 'validations': ['notEmpty']}, {'field': 'premium', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_polizas():
     """ Aplica expectativas y descarta registros malos de bronze_polizas """
@@ -49,12 +48,17 @@ def silver_polizas_ok():
     Lee los registros que pasaron la calidad de silver_pre_quality_bronze_polizas
     y aplica transformaciones finales.
     """
-    # --- CAMBIO 2: Eliminamos el .filter("quarantine IS NULL") ---
+    # --- Eliminamos el .filter("quarantine IS NULL") ---
     df_ok = dp.read_stream("silver_pre_quality_bronze_polizas")
     
-    # --- CAMBIO 3: Aplicamos las transformaciones usando el helper ---
-    return dlt_helpers.apply_silver_transformations(
+    # --- ¡CAMBIO DE NOMBRE DE FUNCIÓN! ---
+    # Usamos la nueva función genérica 'apply_transformations'
+    return dlt_helpers.apply_transformations(
         df_ok,
         [{"name": "polizas_ok_with_date", "params": {"addFields": [{"function": "current_timestamp", "name": "dt_ingestion"}], "input": "validation_polizas_ok"}, "type": "add_fields"}]
     )
+
+
+
+# --- 3. CAPA ORO (GENERADA DESDE 'transformations_gold') ---
 
