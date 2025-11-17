@@ -34,6 +34,7 @@ targets:
           schema: "elt_modular_dlt"
           notifications:
             - email_recipients: [ "ignaqwert00@gmail.com" ]
+              alerts: [ "on_failure" ]
         dlt_df2_polizas:
           name: "DLT - df2_polizas"
           #development: true
@@ -46,6 +47,7 @@ targets:
           schema: "elt_modular_dlt"
           notifications:
             - email_recipients: [ "ignaqwert00@gmail.com" ]
+              alerts: [ "on_failure" ]
 
       jobs:
         mega_job_all_pipelines:
