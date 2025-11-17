@@ -32,7 +32,7 @@ def bronze_polizas():
     name="silver_pre_quality_bronze_polizas",
     comment="Aplica reglas de calidad DLT a la tabla bronze_polizas",
 )
-# --- Usamos 'expect_all_or_drop' y el helper ---
+# --- uso de 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'policy_id', 'validations': ['notEmpty']}, {'field': 'premium', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_polizas():
     """ Aplica expectativas y descarta registros malos de bronze_polizas """

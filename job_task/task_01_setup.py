@@ -34,7 +34,7 @@ def main():
     config_path = sys.argv[1]
     log.info(f"Tarea 1: Iniciando. Leyendo metadatos desde {config_path}")
 
-    # Cargar la configuración del json de metadatos
+    # Cargar la configuracion del json de metadatos
     config = utils.load_config(config_path)
 
     # comprobamos que el fichero no esta vacio y hay dataflow

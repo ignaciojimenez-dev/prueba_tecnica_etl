@@ -36,7 +36,7 @@ def test_transformers_dispatcher(spark: SparkSession):
     test_data = [("Alberto",)]
     df = spark.createDataFrame(test_data, ["name"])
     
-    # El estado inicial (como en orchestrator.py)
+    # El estado inicial como en orchestrator.py
     dataframes_state = {"input_df": df}
     
     # La configuración de transformación de metadata.json
@@ -44,18 +44,17 @@ def test_transformers_dispatcher(spark: SparkSession):
       "name": "person_ok_with_date",
       "type": "add_fields",
       "params": { 
-        "input": "input_df", # Usamos el DF del estado
+        "input": "input_df", 
         "addFields": [{"name": "dt", "function": "current_timestamp"}]
       }
     }
 
     # 2. Actuar
-    # Llamamos al dispatcher
     apply_transform(spark, dataframes_state, transform_config)
 
     # 3. Comprobar
     # Verificamos que el estado se ha actualizado con la clave 'name'
-    # de la transformación ('person_ok_with_date')
+    # de la transformación 'person_ok_with_date'
     assert "person_ok_with_date" in dataframes_state
     assert dataframes_state["person_ok_with_date"].count() == 1
     assert "dt" in dataframes_state["person_ok_with_date"].columns

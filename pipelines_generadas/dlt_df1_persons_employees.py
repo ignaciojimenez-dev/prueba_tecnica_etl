@@ -46,7 +46,7 @@ def bronze_employees():
     name="silver_pre_quality_bronze_person",
     comment="Aplica reglas de calidad DLT a la tabla bronze_person",
 )
-# --- Usamos 'expect_all_or_drop' y el helper ---
+# --- uso de 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules([{'field': 'office', 'validations': ['notEmpty']}, {'field': 'age', 'validations': ['notNull']}]))
 def silver_pre_quality_bronze_person():
     """ Aplica expectativas y descarta registros malos de bronze_person """
@@ -86,7 +86,7 @@ def gold_persons_anonymized():
     """
     df_silver = dp.read_stream("silver_person_ok")
     
-    # ¡Reutilizamos la MISMA función helper genérica!
+    # Reutilizamos la  función helper generica
     # Pasamos la configuración de 'apply_masking'
     return dlt_helpers.apply_transformations(
         df_silver,

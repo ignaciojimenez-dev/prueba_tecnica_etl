@@ -9,7 +9,7 @@ from pyspark.sql import functions as F
 
 log = logging.getLogger(__name__)
 
-# --- 1. Generador de Reglas de Validación ---
+# --- 1. Generador de Reglas de validacion , SE AGREGAN AQUI MAS ---
 
 def _get_dlt_expression(validation_name: str, col_name: str) -> str:
     """
@@ -21,7 +21,7 @@ def _get_dlt_expression(validation_name: str, col_name: str) -> str:
     elif validation_name == 'notEmpty':
         return f"{col_name} IS NOT NULL AND {col_name} != ''"
     
-    # --- Añadir mas reglas aquí ---
+    # --- añadir de forma modular mas reglas si se quiere ---
     # elif validation_name == 'isEmail':
     #     return f"regexp_like({col_name}, '^[a-zA-Z0-9._%+-]+...')"
 
@@ -96,7 +96,7 @@ def _apply_add_fields(df: DataFrame, params: dict) -> DataFrame:
             temp_df = temp_df.withColumn(col_name, F.current_timestamp())
         elif col_function == 'current_date':
             temp_df = temp_df.withColumn(col_name, F.current_date())
-        # --- Añadir más funciones de Spark aquí ---
+        # --- Añadir mas funciones aqui ---
         else:
             log.warning(f"Función '{col_function}' no reconocida para '{col_name}'.")
 
@@ -124,9 +124,7 @@ def _apply_data_masking(df: DataFrame, params: dict) -> DataFrame:
                 log.info(f"Aplicando máscara MD5 al campo '{field}'")
                 temp_df = temp_df.withColumn(field, F.md5(F.col(field).cast("string")))
             
-            # --- Añade más funciones de masking aquí ---
-            # elif func == 'redact':
-            #    temp_df = temp_df.withColumn(field, F.lit("REDACTED"))
+            # --- añadir mas funciones de masking ---
             
             else:
                 log.warning(f"Función de masking '{func}' no reconocida para '{field}'.")

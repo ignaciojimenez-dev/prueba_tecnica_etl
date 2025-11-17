@@ -27,7 +27,7 @@ def read_source(spark: SparkSession, source_config: dict) -> DataFrame:
         # Construimos el reader de Spark
         reader = spark.read.format(source_format)
 
-        # Esta es la opción correcta para manejar carpetas vacías o faltantes
+        # para manejar carpetas vacias o faltantes
         reader = reader.option("ignoreMissingFiles", "true")
 
         if source_format.upper() == 'JSON':

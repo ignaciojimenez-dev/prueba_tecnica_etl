@@ -1,14 +1,13 @@
-# --- PLANTILLA YML.J2 (CORREGIDA) ---
+# --- PLANTILLA YML.J2 ---
 # Usa 'sync.include:' y la ruta de tu workspace
 
 bundle:
   name: "framework-dlt-generado"
 
-# ¡Ruta REAL de tu proyecto en Databricks Repos!
+# Ruta absoluta del proyecto en Databricks Repos
 workspace:
   root_path: "/Workspace/Users/ignaqwert00@gmail.com/prueba_tecnica_etl"
 
-# ¡LA CORRECCIÓN ESTÁ AQUÍ!
 # Usamos 'sync.include' para SINCRONIZAR ficheros .py
 sync:
   include:
@@ -53,9 +52,9 @@ targets:
               description: "Ejecuta el pipeline DLT para df1_persons_employees"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df1_persons_employees.id}"
-              # ¡No hay 'depends_on', todo se ejecuta en paralelo!
+              # No hay 'depends_on', todo se ejecuta en paralelo
             - task_key: "run_dlt_df2_polizas"
               description: "Ejecuta el pipeline DLT para df2_polizas"
               pipeline_task:
                 pipeline_id: "${resources.pipelines.dlt_df2_polizas.id}"
-              # ¡No hay 'depends_on', todo se ejecuta en paralelo!
+              # No hay 'depends_on', todo se ejecuta en paralelo

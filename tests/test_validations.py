@@ -14,7 +14,7 @@ def test_validation_split_and_error_content(spark: SparkSession):
     2. Que los registros KO se separan correctamente.
     3. Que los registros KO tienen el mapa de errores correcto.
     
-    El argumento 'spark' es inyectado automáticamente por 'conftest.py'.
+    El argumento 'spark' lo pasa 'conftest.py'.
     """
     
     #  1.Preparar
@@ -34,12 +34,12 @@ def test_validation_split_and_error_content(spark: SparkSession):
         {"field": "age", "validations": ["notNull"]}
     ]
 
-    # --- 2. Act (Actuar) ---
+    # --- 2. Act  ---
     
     # Llamamos a la función que queremos probar
     df_ok, df_ko = validate_fields(df, rules)
 
-    # --- 3. Assert (Comprobar) ---
+    # --- 3. Assert  ---
     
     # Comprobamos las cuentas
     assert df_ok.count() == 1
@@ -50,7 +50,6 @@ def test_validation_split_and_error_content(spark: SparkSession):
     assert ok_names == ["Fran"]
     
     # Comprobamos el contenido de KO y los códigos de error
-    # (Esta es la comprobación más importante)
     ko_results = {row.name: row.arraycoderrorbyfield for row in df_ko.collect()}
     
     # Comprobamos el error de Xabier

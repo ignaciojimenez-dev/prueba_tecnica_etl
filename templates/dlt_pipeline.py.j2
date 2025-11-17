@@ -40,7 +40,7 @@ def {{ bronze_table_name }}():
     name="{{ pre_quality_table_name }}",
     comment="Aplica reglas de calidad DLT a la tabla {{ input_table }}",
 )
-# --- Usamos 'expect_all_or_drop' y el helper ---
+# --- uso de 'expect_all_or_drop' y el helper ---
 @dp.expect_all_or_drop(dlt_helpers.generate_validation_rules({{ tx.params.validations }}))
 def {{ pre_quality_table_name }}():
     """ Aplica expectativas y descarta registros malos de {{ input_table }} """
@@ -95,7 +95,7 @@ def {{ gold_sink.name }}():
     """
     df_silver = dp.read_stream("{{ input_table }}")
     
-    # ¡Reutilizamos la MISMA función helper genérica!
+    # Reutilizamos la  función helper generica
     # Pasamos la configuración de 'apply_masking'
     return dlt_helpers.apply_transformations(
         df_silver,

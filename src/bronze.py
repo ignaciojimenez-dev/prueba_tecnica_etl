@@ -5,7 +5,7 @@ from . import readers, writers
 
 log = logging.getLogger(__name__)
 
-def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict) -> dict: # CAMBIO: Añadimos '-> dict'
+def run_bronze_ingestion(spark: SparkSession, dataflow_config: dict) -> dict: 
     """
     Ejecuta la capa Bronce:
     1. Lee todas las 'sources'.
