@@ -22,7 +22,8 @@ def test_transformers_add_fields(spark: SparkSession):
     # 2. Actuar
     result_df = _apply_add_fields(df, params) #
 
-    # 3. Comprobar
+    # 3. Comprobar : añade la columna correctamente, la columna añadida tiene el tipo correcto,
+    # el número de filas no cambia
     assert "dt" in result_df.columns
     assert isinstance(result_df.schema["dt"].dataType, TimestampType)
     assert result_df.count() == 1

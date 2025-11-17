@@ -39,7 +39,8 @@ def main():
 
     # comprobamos que el fichero no esta vacio y hay dataflow
 
-    ################################ añadir mas validaciones al metadatos ################################
+    ##### añadir mas validaciones al metadatos, existe dataflows, estos contienen sinks,
+    ##### sources  tranformations , y a su vez estos tienen input params etc
 
     if config and 'dataflows' in config:
         dataflows_list = config['dataflows']

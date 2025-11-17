@@ -19,7 +19,7 @@ def test_validation_split_and_error_content(spark: SparkSession):
     
     #  1.Preparar
     
-    # Usamos los datos de ejemplo de tu enunciado
+    #  datos de ejemplo de tu enunciado
     test_data = [
         ("Xabier", 39, ""),      # KO: office está vacío
         ("Miguel", None, "RIO"), # KO: age es nulo
@@ -28,34 +28,32 @@ def test_validation_split_and_error_content(spark: SparkSession):
     schema = ["name", "age", "office"]
     df = spark.createDataFrame(test_data, schema)
     
-    # Definimos las reglas que queremos probar
+    #  las reglas que queremos probar
     rules = [
         {"field": "office", "validations": ["notEmpty"]},
         {"field": "age", "validations": ["notNull"]}
     ]
 
-    # --- 2. Act  ---
+    #  2. Act  
     
-    # Llamamos a la función que queremos probar
+    #  la función que queremos probar
     df_ok, df_ko = validate_fields(df, rules)
 
-    # --- 3. Assert  ---
+    #  3. Assert  
     
     # Comprobamos las cuentas
     assert df_ok.count() == 1
     assert df_ko.count() == 2
     
-    # Comprobamos el contenido de OK
+    # mirar que el valor ok es de fran
     ok_names = [row.name for row in df_ok.collect()]
     assert ok_names == ["Fran"]
     
-    # Comprobamos el contenido de KO y los códigos de error
+    # sacamos los datos ko
     ko_results = {row.name: row.arraycoderrorbyfield for row in df_ko.collect()}
     
-    # Comprobamos el error de Xabier
+    # comprobar que para cada name ko aparece como notempty y notnull
     assert "Xabier" in ko_results
     assert ko_results["Xabier"] == {"office": "notEmpty"}
-    
-    # Comprobamos el error de Miguel
     assert "Miguel" in ko_results
     assert ko_results["Miguel"] == {"age": "notNull"}

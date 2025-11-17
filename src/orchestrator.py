@@ -43,7 +43,7 @@ def run_single_dataflow(spark: SparkSession, dataflow_config: dict):
                                      initial_state=dataframes_state)
             
         
-        # Fase 3: Golden layer, añadir DataMasking
+        # Fase 3: Golden layer, añadir DataMasking, esta hecho en DLT
         
         log.info(f"--- OK Dataflow {dataflow_name} (Modo Integrado) completado ---")
 

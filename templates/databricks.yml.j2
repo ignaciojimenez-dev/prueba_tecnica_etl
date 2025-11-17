@@ -33,6 +33,10 @@ targets:
           #storage: "/Volumes/workspace/elt_modular_dlt/dlt_storage/{{ df.name }}"
           catalog: "workspace"
           schema: "elt_modular_dlt"
+          notifications:
+            - on_failure: # En caso de fallo
+                # (Asegúrate de que tu admin ha configurado los emails en Databricks)
+                - email_recipients: [ "ignaqwert00@gmail.com" ]
         {% endfor %}
 
       jobs:
