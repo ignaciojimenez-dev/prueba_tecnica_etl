@@ -33,9 +33,7 @@ targets:
           catalog: "workspace"
           schema: "elt_modular_dlt"
           notifications:
-            - on_failure: # En caso de fallo
-                # (Asegúrate de que tu admin ha configurado los emails en Databricks)
-                - email_recipients: [ "ignaqwert00@gmail.com" ]
+            - email_recipients: [ "ignaqwert00@gmail.com" ]
         dlt_df2_polizas:
           name: "DLT - df2_polizas"
           #development: true
@@ -47,9 +45,7 @@ targets:
           catalog: "workspace"
           schema: "elt_modular_dlt"
           notifications:
-            - on_failure: # En caso de fallo
-                # (Asegúrate de que tu admin ha configurado los emails en Databricks)
-                - email_recipients: [ "ignaqwert00@gmail.com" ]
+            - email_recipients: [ "ignaqwert00@gmail.com" ]
 
       jobs:
         mega_job_all_pipelines:
